@@ -24,5 +24,5 @@ independent, save them into `static/img/` and point `CARD_YEARS` and
 copies on PythonAnywhere are no longer what the site serves.
 
 ## What still lives elsewhere
-- Card sign-up form and the Sheng Ji online-room relay: bryanzhang.pythonanywhere.com
+- Card sign-up form, and the online-room relay both games share (`/sj`): bryanzhang.pythonanywhere.com
 - Drink Diary: beverage-journal.onrender.com

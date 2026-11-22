@@ -800,6 +800,23 @@
     
       /* 中文 uses the device's own Chinese face */
       html[lang="zh"] body{font-family:"Nunito",ui-rounded,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;}
+    
+      /* ===== online rooms ===== */
+      .netcols{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.7rem;}
+      @media (max-width:560px){.netcols{grid-template-columns:1fr;}}
+      .netcol{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:.7rem .8rem;display:flex;flex-direction:column;gap:.45rem;align-items:flex-start;}
+      .netcol h3{margin:0;font-size:1rem;font-weight:900;}
+      .netcol p{margin:0;}
+      #wizOnline .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+      #wizOnline input[type=text]{font:inherit;font-weight:800;padding:.4rem .6rem;border:2px solid var(--ink);border-radius:8px;background:#fff;color:var(--ink);min-width:0;}
+      #netCode{width:6.2rem;letter-spacing:.25em;text-transform:uppercase;}
+      .roomcode{display:flex;align-items:baseline;gap:.7rem;background:#fff;border:2px solid var(--gold);border-radius:10px;padding:.5rem .9rem;margin:.2rem 0 .6rem;}
+      .roomcode .lbl{font-size:.8rem;font-weight:800;color:var(--ink-soft);}
+      .roomcode b{font-size:1.9rem;font-weight:900;letter-spacing:.3em;}
+      .netseats{list-style:none;margin:.6rem 0;padding:0;display:flex;flex-direction:column;gap:.3rem;}
+      .netseats li{display:flex;justify-content:space-between;gap:1rem;background:var(--bg-soft);border:1.5px solid var(--line);border-radius:8px;padding:.4rem .7rem;font-size:.95rem;}
+      .netseats li span{font-size:.8rem;font-weight:800;color:var(--ink-soft);}
+      #netLobby .seg button:disabled{opacity:.4;}
     </style>
   </head>
   <body>
@@ -848,6 +865,10 @@
               <span class="branch-title">play solo</span>
               <span class="branch-desc">you vs Robo-Bryan, CPA · one game, deals straight away</span>
             </button>
+            <button class="branch-card" id="onlineBtn" type="button">
+              <span class="branch-title">play online</span>
+              <span class="branch-desc">2–4 phones, each with its own hand</span>
+            </button>
             <button class="branch-card" id="customBtn" type="button">
               <span class="branch-title">set up a table</span>
               <span class="branch-desc">2–4 players, people or computers, on one device</span>
@@ -871,6 +892,31 @@
               <div class="seg"><button data-text="normal" class="on" type="button">normal</button><button data-text="large" type="button">large</button></div>
             </div>
             <p class="tiny" style="margin:.5rem 0 0">with 2+ people on one device, the screen hides each hand between turns. names, card back and choices are remembered on this device.</p>
+          </div>
+        </div>
+
+        <!-- ONLINE branch -->
+        <div id="wizOnline" class="hidden">
+          <div class="wiz-panel">
+            <h2>play online</h2>
+            <div id="netForm">
+              <div class="seat-sub"><span class="lbl">your name</span> <input type="text" id="netName" maxlength="20" placeholder="your name" autocomplete="off"></div>
+              <div class="netcols">
+                <div class="netcol">
+                  <h3>host a room</h3>
+                  <p class="tiny">you deal; friends join with a 4-letter code. empty seats can be computers.</p>
+                  <button class="btn" id="netHostBtn" type="button">host a room</button>
+                </div>
+                <div class="netcol">
+                  <h3>join a room</h3>
+                  <p class="tiny">type the code from the host's screen.</p>
+                  <div class="row"><input type="text" id="netCode" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters"><button class="btn" id="netJoinBtn" type="button">join</button></div>
+                </div>
+              </div>
+            </div>
+            <p class="setup-err" id="netMsg"></p>
+            <div id="netLobby"></div>
+            <div class="wiz-nav"><button class="btn ghost" id="netBack" type="button">← back</button></div>
           </div>
         </div>
 
@@ -1450,6 +1496,8 @@
         statsRecorded:false,   // local stats are written once per game
         _endChampHuman:false,  // series champion was a human (for the confetti call)
       };
+      const NET = { role:null, relay:null, code:null, token:null, pid:null, seat:-1, after:0, v:0, timer:null, ticking:false,
+        guests:[], extras:[], cpus:0, mean:true, started:false, dirty:false, pushT:null, hostName:"", lobby:null, endInfo:null, shownEnd:null, err:"", msg:"" };
       const backSrc = () => BACKS.find(b => b.id === G.cardBack).src;
       /* paint the chosen back once, as a CSS variable — card backs all
          over the table use background-image:var(--back-img), so a render
@@ -1818,7 +1866,7 @@
         $("setupErr").textContent = err;
         if (err) return;
         G.gameId++; // invalidate any timers left over from a previous match
-        saveSettings();
+        if (!NET.role) saveSettings();
         /* names typed by hand can still collide — number any duplicate
            computers (Robo-Bryan, Robo-Bryan 2, …) before the game starts */
         ensureDistinctCpuNames();
@@ -1840,6 +1888,13 @@
                (G.matchGames > 1 ? "best of " + G.matchGames + " — first to " + G.winsNeeded + " game wins takes it." : "one game, winner takes the glory.") +
                (G.meanMode ? " <b>mean mode is on</b> — point-pile tops are field cards, and sets are stacked in the order their maker chooses." : "") +
                (G.meanMode && G.players.length === 4 ? " four players with mean mode on: that's <b>chaos mode</b> — expect the piles to change hands a lot." : ""));
+        if (NET.role === "host"){
+          /* online: no rock-paper-scissors across phones — a random seat leads */
+          const lead = Math.floor(Math.random() * G.players.length);
+          logMsg("<b>" + esc(G.players[lead].name) + "</b> was drawn to go first.");
+          startGame(lead);
+          return;
+        }
         if (G.daily){
           /* everyone playing today's shuffle starts from the same seat, so results compare */
           let lead = G.players.findIndex(p => p.type === "human"); if (lead < 0) lead = 0;
@@ -2182,7 +2237,7 @@
            cards are read-only until it's actually your turn. (with
            several humans, pass-and-play privacy wins and hands stay
            hidden as before.) */
-        const soloIdx = humanCount() === 1 ? G.players.findIndex(x => x.type === "human") : -1;
+        const soloIdx = NET.role ? NET.seat : (humanCount() === 1 ? G.players.findIndex(x => x.type === "human") : -1);
         if (soloIdx >= 0 && soloIdx !== G.current){
           const hp = G.players[soloIdx];
           $("handLabel").textContent = "your hand";
@@ -2226,6 +2281,7 @@
           help.classList.add("hidden");
           return;
         }
+        if (NET.role && G.current !== NET.seat){ st.innerHTML = "<b>" + esc(p.name) + "</b> is playing…"; help.classList.add("hidden"); return; }
         if (G.viewing !== G.current){ st.textContent = "…"; help.classList.add("hidden"); return; }
         help.classList.remove("hidden");
         if (G.phase === "order" && G.pendingOrder){
@@ -2406,6 +2462,7 @@
       function renderAll(pulseIdx){
         renderBackSwitch(); renderScores(pulseIdx); renderOrderPanel(); renderField(); renderHand(); renderStatus(); renderLog();
         renderFinalBanner(); applyHints();
+        if (NET.role === "host" && NET.started){ NET.dirty = true; netPushSoon(); }
       }
       /* pile ordering, at the top of the table: the moment a human
          makes a set in mean mode, this panel appears right under the
@@ -2662,6 +2719,7 @@
         rngFn = null;
         G.field = [];
         G.statsRecorded = false;
+        NET.endInfo = null;
         for (const p of G.players){ p.hand = []; p.score = 0; p.sets = []; p.pile = []; p.stats = freshStats(); }
         for (let r = 0; r < 3; r++) for (const p of G.players) p.hand.push(G.deck.pop());
         G.field.push(G.deck.pop());
@@ -2692,6 +2750,13 @@
         G.turnDeckEmpty = G.deck.length === 0;
         if (G.deck.length === 0 && G.players.every(p => p.hand.length === 0)){ endGame(); return; }
         const p = cur();
+        if (p.type === "human" && NET.role === "host"){
+          /* online: each phone shows its own hand, so there is no hand-off screen */
+          G.viewing = G.current === NET.seat ? G.current : -1;
+          renderAll();
+          maybeAutoPass();
+          return;
+        }
         if (p.type === "human"){
           G.viewing = -1;
           renderAll();
@@ -3007,6 +3072,7 @@
 
       /* ---------- human actions ---------- */
       function doMakeSet(){
+        if (NET.role === "guest"){ if (G.selField != null) netAct({ k:"set", ids:[...G.selHand], field:G.selField }); return; }
         const p = cur();
         const selCards = p.hand.filter(c => G.selHand.has(c.id));
         const selRes = selectedFieldCard();
@@ -3031,11 +3097,13 @@
       }
       function doConfirmOrder(){
         if (!G.pendingOrder || G.orderSel.length !== G.pendingOrder.cards.length) return;
+        if (NET.role === "guest"){ netAct({ k:"order", ids:G.orderSel.slice() }); return; }
         const po = G.pendingOrder;
         const ordered = G.orderSel.map(id => po.cards.find(c => c.id === id));
         completeSet(G.current, po.set, ordered);
       }
       function doSwapOrPass(){
+        if (NET.role === "guest"){ if (G.selHand.size === 1 && G.selField == null) netAct({ k:"swap", ids:[...G.selHand] }); return; }
         const p = cur();
         const selCards = p.hand.filter(c => G.selHand.has(c.id));
         if (selCards.length !== 1 || G.selField) return;
@@ -3048,6 +3116,7 @@
         executeSwap(G.current, selCards[0]);
       }
       function doPostSetPlace(){
+        if (NET.role === "guest"){ if (G.selHand.size === 1) netAct({ k:"place", ids:[...G.selHand] }); return; }
         const p = cur();
         const selCards = p.hand.filter(c => G.selHand.has(c.id));
         if (selCards.length !== 1) return;
@@ -3143,6 +3212,7 @@
         else done();
       });
       function showEndOverlay(winIdx, top){
+        if (NET.role === "host"){ NET.endInfo = { winIdx, top }; NET.dirty = true; netPushSoon(); }
         const title = $("endTitle"), text = $("endText"), stand = $("endStandings"), btns = $("endBtns");
         const seriesDone = G.matchGames === 1 || G.players.some(p => p.wins >= G.winsNeeded) || G.gameNumber >= G.matchGames;
         if (seriesDone && G.matchGames > 1){
@@ -3715,6 +3785,7 @@
       function showWiz(n){
         wizCurrent = n;
         WIZ_PANELS.forEach(id=>$(id).classList.add("hidden"));
+        $("wizOnline").classList.add("hidden");
         const bar = $("wizBar");
         if(n===-1){ $("wizLearn").classList.remove("hidden"); bar.classList.add("hidden"); }
         else if(n===0){ $("wizStep0").classList.remove("hidden"); bar.classList.add("hidden"); }
@@ -3844,6 +3915,270 @@
       /* ---------- tips ---------- */
       document.querySelectorAll("[data-tips]").forEach(b => b.addEventListener("click", () => $("tipsOverlay").classList.remove("hidden")));
       $("tipsClose").addEventListener("click", () => $("tipsOverlay").classList.add("hidden"));
+
+      /* ================= ONLINE ROOMS =================
+         one phone hosts and runs the whole game; up to 3 others join with a
+         room code. the same small relay Sheng Ji uses passes messages: guests
+         send their moves to the host, and the host sends each guest only their
+         own view of the table (their hand, never anyone else's, never the
+         deck). solo and pass-and-play never touch the network. */
+      const RELAY_DEFAULT = "https://bryanzhang.pythonanywhere.com/sj";
+      const NKEY = "14points-online-v1";
+      function relayUrl(){
+        try { const q = new URLSearchParams(location.search).get("relay"); if (q) return q.replace(/\/$/, ""); } catch(e){}
+        return RELAY_DEFAULT;
+      }
+      function roomFromUrl(){ try { return (new URLSearchParams(location.search).get("room") || "").toUpperCase().slice(0, 4); } catch(e){ return ""; } }
+      async function netCall(path, obj, get){
+        const url = NET.relay + path;
+        const r = get ? await fetch(url + "?" + new URLSearchParams(obj), { cache:"no-store" })
+          // text/plain keeps it a "simple" request: no CORS preflight
+          : await fetch(url, { method:"POST", headers:{ "Content-Type":"text/plain" }, body:JSON.stringify(obj) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(j.error || ("http " + r.status)), { code:j.error || "http" });
+        return j;
+      }
+      function netSaveId(){ try { localStorage.setItem(NKEY, JSON.stringify({ code:NET.code, token:NET.token, pid:NET.pid, role:NET.role, ts:Date.now() })); } catch(e){} }
+      function netLink(){ return location.href.split("?")[0].split("#")[0] + "?room=" + NET.code; }
+      function netLeave(reload){
+        clearInterval(NET.timer); NET.timer = null; NET.role = null; NET.started = false;
+        try { localStorage.removeItem(NKEY); } catch(e){}
+        if (reload) location.href = location.href.split("?")[0].split("#")[0];
+      }
+      function netLoop(){ clearInterval(NET.timer); NET.timer = setInterval(netTick, 1000); netTick(); }
+      async function netTick(){
+        if (NET.ticking || !NET.role) return;
+        NET.ticking = true;
+        try {
+          if (NET.role === "host") await hostTick(); else await guestTick();
+          if (NET.err){ NET.err = ""; netLobbyRender(); }
+        } catch(e){
+          const was = NET.err; NET.err = e.code === "auth" || e.code === "noroom" ? "gone" : "offline";
+          if (was !== NET.err) netLobbyRender();
+        }
+        NET.ticking = false;
+      }
+
+      /* ----- host ----- */
+      async function netHost(){
+        const name = $("netName").value.trim() || "Player 1";
+        NET.relay = relayUrl(); NET.msg = "";
+        try {
+          const r = await netCall("/create", { name });
+          Object.assign(NET, { role:"host", code:r.code, token:r.token, pid:0, seat:0, after:0, guests:[], extras:[], started:false, hostName:name, dirty:false, endInfo:null });
+          netLobbyRender(); netLoop();
+        } catch(e){ NET.msg = "couldn't reach the room server. check your connection and try again."; netLobbyRender(); }
+      }
+      async function hostTick(){
+        const r = await netCall("/poll", { code:NET.code, token:NET.token, after:NET.after }, true);
+        for (const m of r.msgs || []){
+          NET.after = Math.max(NET.after, m.seq);
+          const b = m.body || {};
+          if (b.t === "join"){
+            if (NET.guests.some(g => g.pid === m.from) || NET.extras.includes(m.from)){ /* seen */ }
+            else if (!NET.started && NET.guests.length < 3){
+              NET.guests.push({ pid:m.from, name:String(b.name || "").trim().slice(0, 20) || ("Player " + (NET.guests.length + 2)) });
+              NET.cpus = Math.min(NET.cpus, 3 - NET.guests.length);
+              netLobbyRender();
+            } else NET.extras.push(m.from);
+            NET.dirty = true;
+          } else if (b.t === "rejoin") NET.dirty = true;
+          else if (b.t === "act") hostApply(m.from, b);
+        }
+        if (NET.started && G.screen !== "game"){ NET.started = false; NET.endInfo = null; NET.dirty = true; showOnline(); }
+        if (NET.dirty) await hostPush();
+      }
+      async function hostPush(){
+        NET.dirty = false;
+        const states = {};
+        for (const pid of NET.extras) states[pid] = { g:"14p", k:"full" };
+        if (!NET.started){
+          const names = [NET.hostName].concat(NET.guests.map(g => g.name));
+          NET.guests.forEach(g => { states[g.pid] = { g:"14p", k:"lobby", players:names, cpus:NET.cpus }; });
+        } else {
+          G.players.forEach((p, i) => { if (p.pid > 0) states[p.pid] = netSnapshot(i); });
+        }
+        if (!Object.keys(states).length) return;
+        try { await netCall("/send", { code:NET.code, token:NET.token, states }); }
+        catch(e){ NET.dirty = true; throw e; }
+      }
+      function netPushSoon(){
+        if (NET.role !== "host" || NET.pushT) return;
+        NET.pushT = setTimeout(async () => { NET.pushT = null; if (NET.dirty){ try { await hostPush(); } catch(e){} } }, 150);
+      }
+      /* one guest's view: their own hand face up; every other hand and the
+         deck are sent as blanks, so nothing hidden ever leaves the host */
+      function netSnapshot(seat){
+        const blank = (n, base) => Array.from({ length:n }, (_, i) => ({ id:-(base + i + 1), hidden:true }));
+        const mine = G.current === seat;
+        return { g:"14p", k:"game", seat, end:G.phase === "over" ? NET.endInfo : null, G:{
+          players:G.players.map((p, i) => ({ name:p.name, type:p.type, diff:p.diff, score:p.score, sets:p.sets, pile:p.pile, wins:p.wins,
+            totalPoints:p.totalPoints, stats:p.stats, hand:i === seat ? p.hand : blank(p.hand.length, (i + 1) * 100) })),
+          deck:blank(G.deck.length, 1000), field:G.field, current:G.current, phase:G.phase, meanMode:G.meanMode,
+          pendingOrder:mine ? G.pendingOrder : null, orderSel:[], matchGames:G.matchGames, winsNeeded:G.winsNeeded, gameNumber:G.gameNumber,
+          passes:G.passes, lastSet:G.lastSet, log:G.log.slice(-60), turnDeckEmpty:G.turnDeckEmpty, stageEye:G.stageEye, busy:!!G.busy } };
+      }
+      function hostApply(pid, b){
+        const seat = G.players.findIndex(p => p.pid === pid);
+        if (seat < 0 || !NET.started) return;
+        const ids = (b.ids || []).map(Number);
+        const go = (n) => {
+          if (G.screen !== "game" || G.current !== seat || G.phase === "over") return;
+          if (G.busy){ if (n < 25) setTimeout(() => go(n + 1), 200); return; }
+          if (b.k === "set" && G.phase === "play"){ G.selHand = new Set(ids); G.selField = Number(b.field); doMakeSet(); }
+          else if (b.k === "swap" && G.phase === "play"){ G.selHand = new Set(ids.slice(0, 1)); G.selField = null; doSwapOrPass(); }
+          else if (b.k === "place" && G.phase === "postSet"){ G.selHand = new Set(ids.slice(0, 1)); doPostSetPlace(); }
+          else if (b.k === "order" && G.phase === "order" && G.pendingOrder){ G.orderSel = ids; doConfirmOrder(); }
+          G.selHand = new Set(); G.selField = null;
+        };
+        go(0);
+      }
+      function netStart(){
+        const total = 1 + NET.guests.length + NET.cpus;
+        if (total < 2 || total > 4) return;
+        const seats = [{ type:"human", name:NET.hostName }]
+          .concat(NET.guests.map(g => ({ type:"human", name:g.name })))
+          .concat(Array.from({ length:NET.cpus }, () => ({ type:"cpu", diff:"medium", name:CPU_NAMES.medium })));
+        seatState.forEach((s, i) => { if (seats[i]) Object.assign(s, seats[i]); else s.type = "off"; });
+        meanChoice = NET.mean; matchChoice = 1;
+        renderSeats();
+        G.starterGame = false; G.daily = null;
+        NET.started = true; NET.endInfo = null;
+        startMatch();
+        if (G.screen !== "game"){ NET.started = false; return; }
+        G.players.forEach((p, i) => { p.pid = i === 0 ? 0 : (NET.guests[i - 1] ? NET.guests[i - 1].pid : -1); });
+        NET.dirty = true; netPushSoon();
+      }
+
+      /* ----- guest ----- */
+      async function netJoin(code, token){
+        const name = $("netName").value.trim() || "Player";
+        NET.relay = relayUrl(); NET.msg = "";
+        try {
+          const r = await netCall("/join", token ? { code, token } : { code, name });
+          Object.assign(NET, { role:"guest", code:r.code, token:r.token, pid:r.pid, seat:-1, after:0, v:0, lobby:null, shownEnd:null });
+          netSaveId(); netLobbyRender(); netLoop();
+        } catch(e){
+          NET.msg = e.code === "noroom" ? "no room with that code. check it with the host." : e.code === "full" ? "that room is full." : "couldn't reach the room server. check your connection and try again.";
+          netLobbyRender();
+        }
+      }
+      async function guestTick(){
+        const r = await netCall("/poll", { code:NET.code, token:NET.token, after:NET.after, v:NET.v }, true);
+        for (const m of r.msgs || []) NET.after = Math.max(NET.after, m.seq);
+        if (r.state){ NET.v = r.state.v; guestApply(r.state.body); }
+      }
+      function guestApply(b){
+        if (!b || b.g !== "14p"){ NET.msg = "that room is for a different game."; netLeave(); netLobbyRender(); return; }
+        if (b.k === "full"){ NET.msg = "that room is full, or the game has already started."; netLeave(); netLobbyRender(); return; }
+        if (b.k === "lobby"){
+          NET.lobby = b;
+          if (G.screen === "game"){
+            G.screen = "setup"; $("gameScreen").classList.add("hidden"); $("endOverlay").classList.add("hidden");
+            $("setupScreen").classList.remove("hidden"); showOnline();
+          }
+          netLobbyRender(); return;
+        }
+        if (b.k !== "game") return;
+        NET.seat = b.seat;
+        /* keep what I'm in the middle of picking; everything else comes from the host */
+        const keep = G.screen === "game" && G.current === b.G.current && G.phase === b.G.phase && b.G.current === b.seat &&
+          G.gameNumber === b.G.gameNumber && !G.busy;
+        const mySel = { hand:G.selHand, field:G.selField, order:G.orderSel };
+        Object.assign(G, b.G);
+        if (keep){ G.selHand = mySel.hand; G.selField = mySel.field; G.orderSel = mySel.order; }
+        else { G.selHand = new Set(); G.selField = null; }
+        G.viewing = G.current === NET.seat ? NET.seat : -1;
+        G.daily = null; G.starterGame = false; G.revealNote = null; G.cpuReveal = null;
+        if (G.screen !== "game"){ G.screen = "game"; $("setupScreen").classList.add("hidden"); $("gameScreen").classList.remove("hidden"); }
+        renderAll();
+        if (b.end){
+          const key = G.gameNumber + ":" + b.end.winIdx + ":" + b.end.top;
+          if (NET.shownEnd !== key){
+            NET.shownEnd = key; showEndOverlay(b.end.winIdx, b.end.top);
+            const eb = $("endBtns"); if (eb) eb.innerHTML = '<p class="tiny">waiting for the host to deal again…</p>';
+          }
+        } else if (NET.shownEnd){ NET.shownEnd = null; $("endOverlay").classList.add("hidden"); }
+      }
+      function netAct(body){
+        if (G.busy) return;
+        G.busy = true; renderAll();
+        netCall("/send", { code:NET.code, token:NET.token, msgs:[{ to:0, body:Object.assign({ t:"act" }, body) }] })
+          .catch(() => { G.busy = false; renderAll(); });
+      }
+
+      /* ----- lobby ----- */
+      function showOnline(){
+        WIZ_PANELS.forEach(id => $(id).classList.add("hidden"));
+        $("wizBar").classList.add("hidden");
+        $("wizOnline").classList.remove("hidden");
+        netLobbyRender();
+      }
+      function netLobbyRender(){
+        const box = $("netLobby"); if (!box) return;
+        const form = $("netForm");
+        const warn = NET.err === "offline" ? '<p class="setup-err">connection lost. trying again…</p>'
+          : NET.err === "gone" ? '<p class="setup-err">this room has closed.</p>' : "";
+        $("netMsg").textContent = NET.msg || "";
+        if (!NET.role){ form.classList.remove("hidden"); box.innerHTML = ""; return; }
+        form.classList.add("hidden");
+        const code = '<div class="roomcode"><span class="lbl">room</span><b>' + esc(NET.code) + "</b></div>";
+        if (NET.role === "host"){
+          const names = [NET.hostName].concat(NET.guests.map(g => g.name));
+          const total = names.length + NET.cpus, maxCpu = 3 - NET.guests.length;
+          box.innerHTML = code +
+            '<div class="row"><button class="btn ghost small" id="netShare" type="button">share link</button><span class="tiny" id="netCopied"></span></div>' +
+            '<p class="tiny">friends open the link, or choose play online and type the code. everyone keeps this page open with the screen on. this phone runs the game.</p>' +
+            '<ul class="netseats">' + names.map((n, i) => "<li><b>" + esc(n) + "</b><span>" + (i === 0 ? "host" : "joined") + "</span></li>").join("") +
+              Array.from({ length:NET.cpus }, () => "<li><b>" + esc(CPU_NAMES.medium) + "</b><span>computer</span></li>").join("") + "</ul>" +
+            '<div class="seat-sub"><span class="lbl">computers:</span><div class="seg" id="netCpuSeg">' +
+              [0, 1, 2, 3].map(n => '<button type="button" data-cpus="' + n + '"' + (n === NET.cpus ? ' class="on"' : "") + (n > maxCpu ? " disabled" : "") + ">" + n + "</button>").join("") + "</div></div>" +
+            '<div class="seat-sub"><span class="lbl">Mean mode:</span><div class="seg" id="netMeanSeg"><button type="button" data-mean="0"' + (NET.mean ? "" : ' class="on"') + '>off</button><button type="button" data-mean="1"' + (NET.mean ? ' class="on"' : "") + ">on — pile tops can be stolen</button></div></div>" +
+            warn +
+            '<div class="startrow"><button class="btn" id="netStartBtn" type="button"' + (total < 2 ? " disabled" : "") + ">deal the cards</button></div>" +
+            (total < 2 ? '<p class="tiny">waiting for someone to join, or add a computer.</p>' : "");
+          $("netShare").addEventListener("click", async () => {
+            const link = netLink();
+            try { if (navigator.share){ await navigator.share({ title:"14 Points", text:"join my 14 Points room: " + NET.code, url:link }); return; } } catch(e){ if (e && e.name === "AbortError") return; }
+            try { await navigator.clipboard.writeText(link); $("netCopied").textContent = "link copied."; } catch(e){ $("netCopied").textContent = link; }
+          });
+          box.querySelectorAll("[data-cpus]").forEach(b => b.addEventListener("click", () => { NET.cpus = Number(b.dataset.cpus); NET.dirty = true; netLobbyRender(); }));
+          box.querySelectorAll("#netMeanSeg [data-mean]").forEach(b => b.addEventListener("click", () => { NET.mean = b.dataset.mean === "1"; netLobbyRender(); }));
+          $("netStartBtn").addEventListener("click", netStart);
+        } else {
+          const lb = NET.lobby;
+          box.innerHTML = code + (lb
+            ? '<ul class="netseats">' + lb.players.map((n, i) => "<li><b>" + esc(n) + "</b><span>" + (i === 0 ? "host" : "joined") + "</span></li>").join("") + "</ul>" +
+              '<p class="tiny">waiting for the host to deal the cards. keep this page open.</p>'
+            : '<p class="tiny">joining…</p>') + warn;
+        }
+      }
+      $("onlineBtn").addEventListener("click", () => { sndPick(); showOnline(); });
+      $("netHostBtn").addEventListener("click", netHost);
+      $("netJoinBtn").addEventListener("click", () => { const c = $("netCode").value.trim().toUpperCase(); if (c.length === 4) netJoin(c); else { NET.msg = "the code is 4 letters or numbers."; netLobbyRender(); } });
+      $("netBack").addEventListener("click", () => { sndPick(); if (NET.role) netLeave(); NET.msg = ""; $("wizOnline").classList.add("hidden"); showWiz(0); });
+      $("quitBtn").addEventListener("click", (e) => { if (NET.role === "guest"){ e.stopImmediatePropagation(); netLeave(true); } }, true);
+      (function netBoot(){
+        const room = roomFromUrl(); if (!room) return;
+        $("netCode").value = room; showOnline();
+        try {
+          const saved = JSON.parse(localStorage.getItem(NKEY) || "null");
+          if (saved && saved.role === "guest" && saved.code === room && Date.now() - saved.ts < 12 * 3600 * 1000) netJoin(room, saved.token);
+        } catch(e){}
+      })();
+      Object.assign(ZH_DATA.exact, {
+        "play online":"联机对战", "{#}–{#} phones, each with its own hand":"{#}–{#} 台手机，各看各的牌", "your name":"你的名字", "host a room":"开房间", "join a room":"加入房间",
+        "you deal; friends join with a {#}-letter code. empty seats can be computers.":"由你发牌；朋友用 {#} 位房间码加入。空位可以让电脑补上。",
+        "type the code from the host's screen.":"输入房主屏幕上的房间码。", "join":"加入", "room":"房间", "share link":"分享链接", "link copied.":"链接已复制。",
+        "friends open the link, or choose play online and type the code. everyone keeps this page open with the screen on. this phone runs the game.":"朋友打开链接，或者选“联机对战”再输入房间码。所有人都要保持页面打开、屏幕常亮。对局在这台手机上运行。",
+        "host":"房主", "joined":"已加入", "computers:":"电脑：", "waiting for someone to join, or add a computer.":"等人加入，或者加一个电脑。",
+        "waiting for the host to deal the cards. keep this page open.":"等房主发牌。请保持页面打开。", "joining…":"正在加入……",
+        "waiting for the host to deal again…":"等房主再发一局……", "connection lost. trying again…":"连接断了，正在重试……", "this room has closed.":"这个房间已经关闭。",
+        "no room with that code. check it with the host.":"没有这个房间码，请和房主确认。", "that room is full.":"房间满了。",
+        "that room is full, or the game has already started.":"房间满了，或者对局已经开始。", "that room is for a different game.":"这个房间是另一个游戏的。",
+        "couldn't reach the room server. check your connection and try again.":"连不上房间服务器。请检查网络后再试。", "the code is {#} letters or numbers.":"房间码是 {#} 位字母或数字。",
+        "is playing…":"正在出牌……", "online":"联机"
+      });
 
       /* ---------- init ---------- */
 
