@@ -764,6 +764,17 @@
       .table-grid .felt .pilewrap.own .who,.table-grid .felt .piletag.owntag{color:var(--felt-soft);border-color:var(--felt-line);}
       .table-grid .felt .pilewrap.armed{background:rgba(240,207,122,.16);border-color:#f0cf7a;}
       .table-grid .felt .lastset{color:var(--ink);}
+    
+      /* ===== text size, four-colour suits, tips ===== */
+      html.bigtext{font-size:112.5%;}
+      body.suits4 .card[data-suit="diamonds"]{color:#1f5fae;}
+      body.suits4 .card[data-suit="clubs"]{color:#2e7d32;}
+      .setpanel .displayrow + .displayrow{margin-top:.55rem;}
+      .setpanel .displayrow-lbl{min-width:5.2rem;}
+      .overlay .tips-box{text-align:left;max-width:560px;}
+      .tips-list{margin:.6rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.6rem;}
+      .tips-list li{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:.6rem .8rem;font-size:.95rem;line-height:1.4;font-weight:600;color:var(--ink-soft);}
+      .tips-list li b{color:var(--ink);font-weight:900;}
     </style>
   </head>
   <body>
@@ -801,6 +812,7 @@
         <div id="wizStep0">
           <div class="quickrow">
             <button class="btn ghost" id="learnBtn" type="button">▶ tutorial &amp; rules</button>
+            <button class="btn ghost" data-tips type="button">💡 tips</button>
           </div>
           <div class="branch-grid" role="group" aria-label="Choose how to start">
             <button class="branch-card daily" id="dailyQuickBtn" type="button">
@@ -820,6 +832,14 @@
             <div class="displayrow" role="group" aria-label="Display size">
               <span class="displayrow-lbl">display</span>
               <div class="seg" id="fitSegSetup"><button data-fit="1" class="on" type="button">fit to screen</button><button data-fit="0" type="button">full size</button></div>
+            </div>
+            <div class="displayrow" role="group" aria-label="Suit colors">
+              <span class="displayrow-lbl">suit colors</span>
+              <div class="seg"><button data-suits="classic" class="on" type="button">classic</button><button data-suits="four" type="button">four colors</button></div>
+            </div>
+            <div class="displayrow" role="group" aria-label="Text size">
+              <span class="displayrow-lbl">text size</span>
+              <div class="seg"><button data-text="normal" class="on" type="button">normal</button><button data-text="large" type="button">large</button></div>
             </div>
             <p class="tiny" style="margin:.5rem 0 0">with 2+ people on one device, the screen hides each hand between turns. names, card back and choices are remembered on this device.</p>
           </div>
@@ -910,6 +930,7 @@
           <span class="tiny" id="gameMeta"></span>
           <span class="spacer"></span>
           <button class="btn ghost small" id="tutBtnGame">tutorial</button>
+          <button class="btn ghost small" data-tips type="button">tips</button>
           <button class="btn ghost small" id="fitBtnGame" type="button" aria-pressed="true">fit: on</button>
           <div class="settingswrap">
             <button class="btn ghost small" id="gearBtn" type="button" aria-expanded="false" aria-controls="settingsPanel">settings ▾</button>
@@ -926,6 +947,14 @@
                   <button data-fit="1" class="on" type="button">fit to screen</button>
                   <button data-fit="0" type="button">full size</button>
                 </div>
+              </div>
+              <div class="setrow">
+                <span class="lbl">suit colors:</span>
+                <div class="seg"><button data-suits="classic" class="on" type="button">classic</button><button data-suits="four" type="button">four colors</button></div>
+              </div>
+              <div class="setrow">
+                <span class="lbl">text size:</span>
+                <div class="seg"><button data-text="normal" class="on" type="button">normal</button><button data-text="large" type="button">large</button></div>
               </div>
               <div class="setrow">
                 <span class="lbl">computer speed:</span>
@@ -999,6 +1028,26 @@
         </div>
       </div>
     </section>
+
+    <!-- ================= TIPS ================= -->
+    <div class="overlay hidden" id="tipsOverlay" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
+      <div class="box tips-box">
+        <div class="tut-head">
+          <h2 id="tipsTitle">tips</h2>
+          <button class="btn ghost small" id="tipsClose" type="button">✕ close</button>
+        </div>
+        <ul class="tips-list">
+          <li><b>count points, not cards.</b> a set scores every card's suit: ♠ 4, ♥ 3, ♣ 2, ♦ 1. two spades beat four diamonds.</li>
+          <li><b>one field card, as many hand cards as it takes.</b> the more of your hand goes into the set, the more it scores.</li>
+          <li><b>mind what you leave behind.</b> after a set you put one hand card on the field. leave the one that is hardest to turn into 14.</li>
+          <li><b>jokers only go with jokers.</b> a joker counts 7, but never pairs with a 7.</li>
+          <li><b>nothing to make?</b> drop + draw. the card you drop goes to the field, so drop a cheap one.</li>
+          <li><b>mean mode: steal the tops.</b> the top card of an opponent's pile counts as a field card. take it and its points move to you.</li>
+          <li><b>mean mode: bury the good ones.</b> you choose how your set stacks. put your cheapest card on top.</li>
+          <li><b>the end comes fast.</b> once the deck is gone there is no drawing, and cards left in your hand score nothing.</li>
+        </ul>
+      </div>
+    </div>
 
     <!-- ================= TUTORIAL OVERLAY ================= -->
     <div class="overlay hidden" id="tutOverlay" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
@@ -1871,6 +1920,7 @@
         const el = document.createElement(opts.clickable ? "button" : "div");
         el.className = "card" + (opts.size ? " " + opts.size : "");
         el.dataset.cid = c.id;
+        el.dataset.suit = c.suit;
         if (c.suit === "joker"){
           el.classList.add("joker");
           el.innerHTML = '<div class="jword"><span class="star">★</span><span class="w">JOKER</span><span class="w" style="letter-spacing:.02em">= 7</span></div>' +
@@ -3637,6 +3687,24 @@
       });
       $("wiz2Next").addEventListener("click",()=>{ sndPick(); showWiz(3); });
       try{ const di=$("dailyQuickInfo"); if(di) { const dn=dailyInfoFor(new Date()).num; di.textContent="#"+dn+" · the same shuffle for everyone today."+dailyStreakNote(dn).toLowerCase(); } }catch(e){}
+
+      /* ---------- look: text size and four-colour suits (this device only) ---------- */
+      const LOOK_KEY = "14points-look-v1";
+      const look = { text:"normal", suits:"classic" };
+      try { Object.assign(look, JSON.parse(localStorage.getItem(LOOK_KEY) || "{}") || {}); } catch(e){}
+      function applyLook(){
+        document.documentElement.classList.toggle("bigtext", look.text === "large");
+        document.body.classList.toggle("suits4", look.suits === "four");
+        document.querySelectorAll("[data-text]").forEach(b => b.classList.toggle("on", b.dataset.text === look.text));
+        document.querySelectorAll("[data-suits]").forEach(b => b.classList.toggle("on", b.dataset.suits === look.suits));
+        try { localStorage.setItem(LOOK_KEY, JSON.stringify(look)); } catch(e){}
+      }
+      document.querySelectorAll("[data-text]").forEach(b => b.addEventListener("click", () => { look.text = b.dataset.text; applyLook(); }));
+      document.querySelectorAll("[data-suits]").forEach(b => b.addEventListener("click", () => { look.suits = b.dataset.suits; applyLook(); }));
+      applyLook();
+      /* ---------- tips ---------- */
+      document.querySelectorAll("[data-tips]").forEach(b => b.addEventListener("click", () => $("tipsOverlay").classList.remove("hidden")));
+      $("tipsClose").addEventListener("click", () => $("tipsOverlay").classList.add("hidden"));
 
       /* ---------- init ---------- */
 
