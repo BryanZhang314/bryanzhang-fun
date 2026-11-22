@@ -871,7 +871,7 @@
                 <li><b>The deal:</b> everyone gets 3 cards, one card face-up on the field.</li>
                 <li><b>On your turn:</b> <b>make a set</b> — hand cards + <i>exactly one</i> field card totalling 14, score the suit points of every card, draw back up to 4 and put one hand card on the field — <b>or drop + draw</b> one card. One set per turn.</li>
                 <li><b>Jokers:</b> only ever pair joker-with-joker; never with 7s.</li>
-                <li><b>The end:</b> when the deck runs out there's no drawing; a set needs no after-discard. Passing with nothing to play still puts a hand card on the field. A full round with no sets ends the game; cards left in hand score nothing.</li>
+                <li><b>The end:</b> when the deck runs out there's no drawing, and a set needs no after-discard. That includes the set that draws the last cards. Passing with nothing to play still puts a hand card on the field. A full round with no sets ends the game; cards left in hand score nothing.</li>
                 <li><b>Who starts:</b> rock-paper-scissors first game, then lowest total points.</li>
                 <li><b>Computers:</b> easy takes most sets sloppily &amp; stacks randomly; medium takes the best set, cheapest-on-top; hard also stacks by lowest expected loss and keeps cards that are one field card from a set.</li>
                 <li><b>Mean mode:</b> opponents' pile tops count as field cards. Steal one and its points move to you; you choose your stack order to bury valuable cards.</li>
@@ -2909,8 +2909,9 @@
           later(() => finishTurn(true), 650);
           return;
         }
-        // deck already empty when the set was made: no forced discard after it
-        if (deckEmptyForSet){
+        // deck already empty when the set was made, or emptied by this draw:
+        // no card is left on the field after it
+        if (deckEmptyForSet || G.deck.length === 0){
           renderAll(playerIdx);
           G.busy = true;
           later(() => finishTurn(true), 650);
@@ -3483,7 +3484,7 @@
         ul.innerHTML = "<li><b>You score</b> the suit points of every card in the set, and the cards go to your point pile.</li><li><b>You draw back up to 4 cards</b> from the deck.</li><li><b>You put one hand card onto the field</b> — the forced discard. Choose it carefully: it's the next player's raw material.</li>";
         body.appendChild(ul);
         const co = document.createElement("div"); co.className = "tut-callout";
-        co.innerHTML = "<b>The endgame changes one rule:</b> once the deck is empty there's no more drawing — and if you make a set, there's <b>no forced discard after it</b> either. Your turn just ends with your smaller hand. If you pass with nothing to play, you still put one hand card onto the field as you pass — no draw. Everyone gets a final chance; a full round with no sets ends the game, and cards left in hand are worth nothing.";
+        co.innerHTML = "<b>The endgame changes one rule:</b> once the deck is empty there's no more drawing — and if you make a set, there's <b>no forced discard after it</b> either. The set that draws the last cards from the deck counts too. Your turn just ends with your smaller hand. If you pass with nothing to play, you still put one hand card onto the field as you pass — no draw. Everyone gets a final chance; a full round with no sets ends the game, and cards left in hand are worth nothing.";
         body.appendChild(co);
         tutP(body, "First player is decided by rock-paper-scissors. In a best-of series, the player with the lowest total points leads the next game — a head start for the underdog.");
       }
