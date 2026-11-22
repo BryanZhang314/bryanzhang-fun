@@ -775,6 +775,16 @@
       .tips-list{margin:.6rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.6rem;}
       .tips-list li{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:.6rem .8rem;font-size:.95rem;line-height:1.4;font-weight:600;color:var(--ink-soft);}
       .tips-list li b{color:var(--ink);font-weight:900;}
+    
+      /* four actions on one row: room for "make set · 12" and "drop + draw" on a phone */
+      .actions .btn.act-set{flex:1.4 1 0;}
+      .actions .btn.act-sug{flex:.92 1 0;}
+      .actions .btn.act-drop{flex:1.38 1 0;}
+      .actions .btn.act-clear{flex:.68 1 0;}
+      /* on a phone the deck count sits beside the deck; keep the latest-set box clear of it */
+      @media (max-width:560px){
+        body.fit #gameScreen .deckpile{display:flex;align-items:center;gap:.35rem;width:auto;flex:none;}
+      }
     </style>
   </head>
   <body>
@@ -2297,15 +2307,21 @@
         /* nothing picked: the math line stays empty. no standing
            instructions on the table during play — help is behind ? */
         const setBtn = document.createElement("button");
-        setBtn.className = "btn good"; setBtn.textContent = "make set";
+        setBtn.className = "btn good act-set"; setBtn.textContent = "make set";
         const chk = fCard && selCards.length ? checkSelection(selCards, fCard) : { state:"no" };
         setBtn.disabled = chk.state !== "set" || G.busy;
         if (chk.state === "set") setBtn.textContent = "make set · " + chk.points;
         setBtn.title = chk.state === "set" ? "make the set · " + chk.points + " pts" : "make the set";
         setBtn.addEventListener("click", doMakeSet);
         act.appendChild(setBtn);
+        const sugBtn = document.createElement("button");
+        sugBtn.className = "btn ghost act-sug"; sugBtn.textContent = "suggest";
+        sugBtn.title = "pick the move a careful player would make — you still choose whether to play it";
+        sugBtn.disabled = G.busy || G.phase !== "play";
+        sugBtn.addEventListener("click", doSuggest);
+        act.appendChild(sugBtn);
         const dropBtn = document.createElement("button");
-        dropBtn.className = "btn ghost";
+        dropBtn.className = "btn ghost act-drop";
         dropBtn.textContent = G.deck.length ? "drop + draw" : "pass";
         dropBtn.title = G.deck.length
           ? "Drop + draw: put the selected card down on the field and draw a replacement"
@@ -2314,10 +2330,32 @@
         dropBtn.addEventListener("click", doSwapOrPass);
         act.appendChild(dropBtn);
         const clearBtn = document.createElement("button");
-        clearBtn.className = "btn ghost"; clearBtn.textContent = "clear"; clearBtn.title = "clear picks";
+        clearBtn.className = "btn ghost act-clear"; clearBtn.textContent = "clear"; clearBtn.title = "clear picks";
         clearBtn.disabled = (!selCards.length && !fCard) || G.busy;
         clearBtn.addEventListener("click", () => { G.selHand.clear(); G.selField = null; sndPick(); renderAll(); });
         act.appendChild(clearBtn);
+      }
+      /* suggest: selects the move the hard computer would make from this seat —
+         the best-scoring set (a steal counts double), or the safest card to drop.
+         it only selects; the player still presses make set or drop + draw. */
+      function doSuggest(){
+        if (G.busy || G.phase !== "play" || !isHumanTurn()) return;
+        const p = cur();
+        const sets = findSetsFor(G.current);
+        G.selHand.clear(); G.selField = null;
+        if (sets.length){
+          const unseen = unseenCards(p);
+          const pick = sets.slice().sort((a, b) =>
+            (b.points + (b.fieldOwner >= 0 ? b.field.pts : 0)) - (a.points + (a.fieldOwner >= 0 ? a.field.pts : 0)) ||
+            fieldThreat(b.field, unseen) - fieldThreat(a.field, unseen) ||
+            b.hand.length - a.hand.length)[0];
+          pick.hand.forEach(c => G.selHand.add(c.id));
+          G.selField = pick.field.id;
+        } else if (p.hand.length){
+          const c = chooseSwapCard(p);
+          if (c) G.selHand.add(c.id);
+        }
+        sndPick(); renderAll();
       }
       function describeSelection(selCards, fCard){
         return selCards.map(cardName).join(" + ") + " + " + cardName(fCard) + " = " +
