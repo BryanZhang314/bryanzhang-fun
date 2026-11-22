@@ -724,6 +724,24 @@
       @media (prefers-reduced-motion: reduce){
         *{animation:none !important;transition:none !important;}
       }
+    
+      /* ===== setup in Sheng Ji's shape: stacked choices, one settings panel ===== */
+      .quickrow{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 .7rem;}
+      .branch-grid{display:flex;flex-direction:column;gap:.6rem;grid-template-columns:none;}
+      .branch-card,.branch-card.primary{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;text-align:left;width:100%;background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:.8rem 1rem;box-shadow:none;}
+      .branch-card.daily{background:linear-gradient(120deg,#fff7ea,var(--panel));border-color:#b07d2b;}
+      .branch-card .branch-title,.branch-card.primary .branch-title{font-size:1.15rem;font-weight:900;color:var(--ink);}
+      .branch-card .branch-desc,.branch-card.primary .branch-desc{font-size:.9rem;font-weight:700;color:var(--ink-soft);}
+      .setpanel{margin-top:.8rem;background:var(--bg-soft);border:1.5px solid var(--line);border-radius:12px;padding:.8rem 1rem;}
+      .setpanel .displayrow{margin:0;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;}
+      .setpanel .displayrow-lbl{font-size:.8rem;font-weight:800;color:var(--ink-soft);min-width:3.6rem;}
+      #wizStep1 .wiz-nav,#wizStep2 .wiz-nav,#wizSummary{display:none;}
+      #wizStep1 .wiz-panel,#wizStep2 .wiz-panel{margin-bottom:.7rem;}
+      .wiz-panel h2{text-transform:none;}
+      /* the in-game settings box used to hang off the left edge of a phone */
+      @media (max-width:560px){
+        .settings{position:fixed;left:8px;right:8px;top:54px;width:auto;max-height:calc(100dvh - 68px);overflow:auto;}
+      }
     </style>
   </head>
   <body>
@@ -741,14 +759,14 @@
       <div class="wrap">
         <a href="/" style="display:inline-block;margin-bottom:.4rem;font-size:.85rem;font-weight:700;color:inherit;opacity:.75;text-decoration:none">&larr; Bryan's Cyber-Physiognomy</a>
         <h1 class="title">14 points</h1>
-        <p class="tagline">Make sets that add up to <b>14</b> — one field card + cards from your hand. Suits are points: ♠ 4 · ♥ 3 · ♣ 2 · ♦ 1.</p>
+        <p class="tagline">make sets that add up to <b>14</b> — one field card + cards from your hand. Suits are points: ♠ 4 · ♥ 3 · ♣ 2 · ♦ 1.</p>
         <p class="tiny" style="margin:-.3rem 0 .8rem">Taught to us by <span lang="zh">小冰块</span>. Thank you.</p>
 
         <div class="tutprompt hidden" id="tutPrompt" role="note">
-          <span class="grow"><b>First time?</b> Try a starter game — base rules vs an easy computer, no stealing yet.</span>
-          <button class="btn small" id="starterBtn" type="button">Play a starter game</button>
-          <button class="btn small ghost" id="tutPromptBtn" type="button">Tutorial</button>
-          <button class="tut-skip" id="tutPromptDismiss" type="button">No thanks</button>
+          <span class="grow"><b>first time?</b> try a starter game: base rules against an easy computer, no stealing yet.</span>
+          <button class="btn small" id="starterBtn" type="button">play a starter game</button>
+          <button class="btn small ghost" id="tutPromptBtn" type="button">tutorial</button>
+          <button class="tut-skip" id="tutPromptDismiss" type="button">no thanks</button>
         </div>
 
         <div class="wiz-bar hidden" id="wizBar" aria-hidden="true">
@@ -759,34 +777,30 @@
 
         <!-- STEP 0 · branch -->
         <div id="wizStep0">
+          <div class="quickrow">
+            <button class="btn ghost" id="learnBtn" type="button">▶ tutorial &amp; rules</button>
+          </div>
           <div class="branch-grid" role="group" aria-label="Choose how to start">
-            <button class="branch-card primary" id="quickPlayBtn" type="button">
-              <span class="branch-meta">Fastest · 2 players</span>
-              <span class="branch-title">▶ Play now</span>
-              <span class="branch-desc">You vs Robo-Bryan, CPA (medium) · Mean mode on · Single game. No setup — deals straight away.</span>
+            <button class="branch-card daily" id="dailyQuickBtn" type="button">
+              <span class="branch-title">daily deal</span>
+              <span class="branch-desc" id="dailyQuickInfo">today's deal, the same shuffle for everyone.</span>
+            </button>
+            <button class="branch-card" id="quickPlayBtn" type="button">
+              <span class="branch-title">play solo</span>
+              <span class="branch-desc">you vs Robo-Bryan, CPA · one game, deals straight away</span>
             </button>
             <button class="branch-card" id="customBtn" type="button">
-              <span class="branch-meta">2–4 players · 3 short steps</span>
-              <span class="branch-title">Custom game →</span>
-              <span class="branch-desc">Mix humans &amp; computers, pick a best-of series, turn mean mode on or off, choose a card back.</span>
-            </button>
-            <button class="branch-card" id="dailyQuickBtn" type="button">
-              <span class="branch-meta">Same shuffle for everyone today</span>
-              <span class="branch-title">Daily deal →</span>
-              <span class="branch-desc" id="dailyQuickInfo">Today's seeded deal, using your saved players.</span>
-            </button>
-            <button class="branch-card" id="learnBtn" type="button">
-              <span class="branch-meta">2 minutes</span>
-              <span class="branch-title">Learn first →</span>
-              <span class="branch-desc">Interactive tutorial, mean-mode walkthrough, and the full rules — only if you want them.</span>
+              <span class="branch-title">set up a table</span>
+              <span class="branch-desc">2–4 players, people or computers, on one device</span>
             </button>
           </div>
-          <div class="displayrow" role="group" aria-label="Display size">
-            <span class="displayrow-lbl">Display:</span>
-            <div class="seg" id="fitSegSetup"><button data-fit="1" class="on" type="button">fit to screen</button><button data-fit="0" type="button">full size</button></div>
-            <span class="tiny displayrow-note">Fit shrinks the cards &amp; spacing so the whole table fits one screen — phone or laptop. Full size keeps the bigger cards (the page may scroll).</span>
+          <div class="setpanel">
+            <div class="displayrow" role="group" aria-label="Display size">
+              <span class="displayrow-lbl">display</span>
+              <div class="seg" id="fitSegSetup"><button data-fit="1" class="on" type="button">fit to screen</button><button data-fit="0" type="button">full size</button></div>
+            </div>
+            <p class="tiny" style="margin:.5rem 0 0">with 2+ people on one device, the screen hides each hand between turns. names, card back and choices are remembered on this device.</p>
           </div>
-          <p class="tiny" style="margin:.7rem 0 0">Pass-and-play: with 2+ humans the screen hides each hand between turns. Your names, card back &amp; choices are remembered on this device.</p>
         </div>
 
         <!-- LEARN branch -->
@@ -818,7 +832,7 @@
         <!-- STEP 1 · players -->
         <div id="wizStep1" class="hidden">
           <div class="wiz-panel">
-            <h2>1 · Who's playing?</h2>
+            <h2>who's playing?</h2>
             <p class="lede">2–4 seats. Leave seats 3–4 empty if you don't need them.</p>
             <div id="seats"></div>
             <p class="setup-err" id="wizErr1"></p>
@@ -829,9 +843,8 @@
         <!-- STEP 2 · format -->
         <div id="wizStep2" class="hidden">
           <div class="wiz-panel">
-            <h2>2 · Match &amp; mean mode</h2>
-            <p class="lede">Just two choices — you can skip reading the detail unless you want it.</p>
-            <div class="seat-sub"><span class="lbl">Match:</span>
+            <h2>match &amp; mean mode</h2>
+                        <div class="seat-sub"><span class="lbl">Match:</span>
               <div class="seg" id="matchSeg"><button data-match="1" class="on">single game</button><button data-match="3">best of 3</button><button data-match="5">best of 5</button><button data-match="7">best of 7</button></div>
             </div>
             <div class="seat-sub"><span class="lbl">Mean mode:</span>
@@ -847,7 +860,7 @@
         <!-- STEP 3 · look & start -->
         <div id="wizStep3" class="hidden">
           <div class="wiz-panel">
-            <h2>3 · Card back &amp; start</h2>
+            <h2>card back</h2>
             <p class="lede">One deck-wide back, from Bryan &amp; Xingjia's holiday cards. Changeable mid-game too.</p>
             <div class="backs" id="backPicker"></div>
             <div class="suit-chips" aria-label="Suit points"><span>♠ Spades &amp; jokers · 4 pts</span><span>♥ Hearts · 3 pts</span><span>♣ Clubs · 2 pts</span><span>♦ Diamonds · 1 pt</span></div>
@@ -855,11 +868,11 @@
             <div class="wiz-summary" id="wizSummary"></div>
             <p class="setup-err" id="setupErr"></p>
             <div class="startrow" style="margin-top:.4rem">
-              <button class="btn" id="startBtn">Start — rock, paper, scissors decides who goes first</button>
-              <button class="btn ghost" id="dailyBtn" type="button">Daily deal instead</button>
+              <button class="btn" id="startBtn">deal the cards</button>
+              <button class="btn ghost" id="dailyBtn" type="button">daily deal with these players</button>
             </div>
             <span class="tiny" id="dailyInfo"></span>
-            <div class="wiz-nav"><button class="btn ghost" data-wiz-back="2" type="button">← Format</button></div>
+            <div class="wiz-nav"><button class="btn ghost" data-wiz-back="0" type="button">← back</button></div>
           </div>
         </div>
 
@@ -1580,8 +1593,10 @@
         $("meanSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
         saveSettings();
       });
-      $("startBtn").addEventListener("click", () => { G.starterGame = false; G.daily = null; startMatch(); });
-      $("dailyBtn").addEventListener("click", () => { G.starterGame = false; G.daily = dailyInfoFor(new Date()); startMatch(); });
+      /* a blank name is fine: it becomes "Player N", as in Sheng Ji */
+      function fillBlankNames(){ seatState.forEach((s2, i) => { if (s2.type === "human" && !s2.name.trim()) s2.name = "Player " + (i + 1); }); renderSeats(); }
+      $("startBtn").addEventListener("click", () => { fillBlankNames(); G.starterGame = false; G.daily = null; startMatch(); });
+      $("dailyBtn").addEventListener("click", () => { fillBlankNames(); G.starterGame = false; G.daily = dailyInfoFor(new Date()); startMatch(); });
       $("dailyInfo").textContent = "today's daily is #" + dailyInfoFor(new Date()).num + " — the same shuffle for everyone who plays it today.";
       $("speedSeg").addEventListener("click", (e) => {
         const b = e.target.closest("button"); if (!b) return;
@@ -1721,6 +1736,13 @@
                (G.matchGames > 1 ? "best of " + G.matchGames + " — first to " + G.winsNeeded + " game wins takes it." : "one game, winner takes the glory.") +
                (G.meanMode ? " <b>mean mode is on</b> — point-pile tops are field cards, and sets are stacked in the order their maker chooses." : "") +
                (G.meanMode && G.players.length === 4 ? " four players with mean mode on: that's <b>chaos mode</b> — expect the piles to change hands a lot." : ""));
+        if (G.daily){
+          /* everyone playing today's shuffle starts from the same seat, so results compare */
+          let lead = G.players.findIndex(p => p.type === "human"); if (lead < 0) lead = 0;
+          logMsg("daily deal #" + G.daily.num + ": <b>" + esc(G.players[lead].name) + "</b> goes first.");
+          startGame(lead);
+          return;
+        }
         runRPS(G.players.map((_, i) => i), (winner) => {
           logMsg("<b>" + esc(G.players[winner].name) + "</b> won rock-paper-scissors and goes first.");
           startGame(winner);
@@ -1769,6 +1791,18 @@
             box.appendChild(btns); main.appendChild(box);
           }
           function reveal(){
+            if (humanCount() === 1){
+              for (let n = 0; n < 80; n++){
+                const ds = [...new Set(alive.map(pi => picks[pi]))];
+                if (ds.length === 2){
+                  const wt = RPS_BEATS[ds[0]] === ds[1] ? ds[0] : ds[1];
+                  const w = alive.filter(pi => picks[pi] === wt);
+                  if (w.length === 1) break;
+                  alive = w;
+                }
+                for (const pi of alive) if (G.players[pi].type === "cpu") picks[pi] = randOf(["rock","paper","scissors"]);
+              }
+            }
             $("rpsText").textContent = "the throws:";
             main.innerHTML = "";
             const wrap = document.createElement("div"); wrap.className = "throws";
@@ -3551,10 +3585,8 @@
         if(n===-1){ $("wizLearn").classList.remove("hidden"); bar.classList.add("hidden"); }
         else if(n===0){ $("wizStep0").classList.remove("hidden"); bar.classList.add("hidden"); }
         else{
-          $("wizStep"+n).classList.remove("hidden"); bar.classList.remove("hidden");
-          $("wizLabel").textContent = "Custom game · Step "+n+" of 3 — "+["","Who's playing?","Match & mean mode","Card back & start"][n];
-          [1,2,3].forEach(i=>{ const d=$("wizDot"+i); d.className = i<n?"done":(i===n?"on":""); });
-          if(n===3) $("wizSummary").innerHTML = wizSummaryText();
+          /* players, format and card back sit on one screen, as in Sheng Ji */
+          [1,2,3].forEach(i=>$("wizStep"+i).classList.remove("hidden")); bar.classList.add("hidden");
         }
         const w = document.querySelector("#setupScreen .wrap"); if(w) w.scrollIntoView({block:"start"});
       }
@@ -3582,7 +3614,7 @@
         el.textContent=""; sndPick(); showWiz(2);
       });
       $("wiz2Next").addEventListener("click",()=>{ sndPick(); showWiz(3); });
-      try{ const di=$("dailyQuickInfo"); if(di) { const dn=dailyInfoFor(new Date()).num; di.textContent="Today's daily is #"+dn+" — same shuffle for everyone, using your saved players."+dailyStreakNote(dn); } }catch(e){}
+      try{ const di=$("dailyQuickInfo"); if(di) { const dn=dailyInfoFor(new Date()).num; di.textContent="#"+dn+" · the same shuffle for everyone today."+dailyStreakNote(dn).toLowerCase(); } }catch(e){}
 
       /* ---------- init ---------- */
 
