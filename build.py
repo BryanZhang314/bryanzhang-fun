@@ -71,6 +71,7 @@ main{padding:44px 0 64px}
 .lede{font-size:1.15rem}
 .btn{display:inline-block;font-weight:600;text-decoration:none;padding:11px 20px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:var(--paper)}
 .btn.ghost{background:transparent;color:var(--ink)}
+button.btn{font:inherit;font-weight:600;cursor:pointer}
 .btn:hover{transform:translateY(-1px)}
 @media (prefers-reduced-motion:reduce){.btn:hover{transform:none}}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
@@ -193,14 +194,27 @@ class Ctx:
         dims = f' width="{w}" height="{h}"' if w and h else ""
         return f'<figure class="slot {kind}"><img src="{e(src)}" alt="{e(alt)}"{dims} loading="lazy">{cap}</figure>'
 
+# The welcome clip from the old site's header, now a labelled button on the home page.
+WELCOME = """<div class="row"><button class="btn ghost" type="button" id="welcomeBtn" aria-pressed="false">&#9654; Play welcome</button>
+    <audio id="welcomeAudio" src="/audio/welcome.m4a" preload="none"></audio></div>
+    <script>
+    (function(){var b=document.getElementById("welcomeBtn"),a=document.getElementById("welcomeAudio");
+    function show(on){b.textContent=on?"\u275A\u275A Pause welcome":"\u25B6 Play welcome";b.setAttribute("aria-pressed",on?"true":"false");}
+    b.addEventListener("click",function(){if(a.paused){a.play().catch(function(){show(false);});}else{a.pause();}});
+    a.addEventListener("play",function(){show(true);});a.addEventListener("pause",function(){show(false);});
+    a.addEventListener("ended",function(){a.currentTime=0;show(false);});})();
+    </script>"""
+
 
 def home(c):
     past = "#past-cards" if c.preview else ROUTES["cards"][0] + "#past-cards"
+    welcome = "" if c.preview else WELCOME
     return f"""
 <div class="hero">
   <div class="stack">
     <h1>This was supposed to be a holiday card sign-up page.</h1>
     <p class="lede">It got out of hand. Now it has two card games and a drink diary.</p>
+    {welcome}
     <div class="thanks">
       <p>Thank you <span lang="zh">小冰块</span> for teaching us how to play 14 Points.</p>
       <p>Thank you <span lang="zh">亚琦</span> for the inspiration behind the Drink Diary.</p>
