@@ -1,3 +1,6 @@
 preview.html
 __pycache__/
 .DS_Store
+
+# the relay's local test database
+*.sqlite3
