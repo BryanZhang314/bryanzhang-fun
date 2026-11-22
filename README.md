@@ -12,11 +12,9 @@ Edit copy and pages in `build.py`; never edit `public/` by hand.
 committing any change to `build.py` or `static/`.
 
 ## Images
-Card scans and the About photo are loaded straight from Wix's image host
-(static.wixstatic.com), using the files uploaded there in July 2026. They keep
-working only while those files stay in the Wix account. To make the site
-independent, save them into `static/img/` and point `CARD_YEARS` and
-`HOME_PHOTO` in `build.py` at the local paths.
+Card scans (`static/img/cards/`) and the About photo (`static/img/home-photo.jpg`)
+live in this repo. Nothing on the site loads from Wix. To add a year's card, drop
+the scan in `static/img/cards/` and add it to `CARD_YEARS` in `build.py`.
 
 ## Games
 14 Points and Sheng Ji are single files: `static/14-points/index.html` and

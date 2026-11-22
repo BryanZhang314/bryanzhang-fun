@@ -293,24 +293,24 @@ def drink(c):
 """
 
 
-# Card scans are still served from Wix's image host (the files uploaded there in July 2026).
-WIX = "https://static.wixstatic.com/media/"
+# Card scans and the About photo live in static/img (copied in from Wix, November 2026).
+CARDS = "/img/cards/"
 CARD_YEARS = [
     ("2026", "On its way", []),
-    ("2025", "Alhambra", [("3409c0_127c7685e49445ca80f4ea74d4b44e38~mv2.png", 620, 838), ("3409c0_c3af685ff9bf4949ba208cfc751caf84~mv2.png", 624, 855)]),
-    ("2024", "HD Museum", [("3409c0_844e7e2efb4147f299016c2ef83fea5c~mv2.png", 593, 804), ("3409c0_65416871495f4ff6b0288069d6371cd2~mv2.png", 614, 806)]),
-    ("2023", "Tokyo", [("3409c0_1ea9292511674fafa770594bafef4791~mv2.png", 606, 798), ("3409c0_3024c3234fbd4633b97397cb825af68b~mv2.png", 594, 791)]),
-    ("2022", "New Jersey", [("3409c0_c66085823e824023b05a67cd5996f97a~mv2.png", 1309, 837)]),
-    ("2021", "Harlem", [("3409c0_2a74c66615b347ae987364a93466ce77~mv2.png", 695, 884)]),
+    ("2025", "Alhambra", [("2025-front.webp", 620, 838), ("2025-back.webp", 624, 855)]),
+    ("2024", "HD Museum", [("2024-front.webp", 593, 804), ("2024-back.webp", 614, 806)]),
+    ("2023", "Tokyo", [("2023-front.webp", 606, 798), ("2023-back.webp", 594, 791)]),
+    ("2022", "New Jersey", [("2022.webp", 1309, 837)]),
+    ("2021", "Harlem", [("2021.webp", 695, 884)]),
 ]
-HOME_PHOTO = WIX + "3409c0_2f1e84c2a5b84c1fad418d7263765fdf~mv2.jpg/v1/fill/w_800,h_1000,al_c,q_85/photo.jpg"
+HOME_PHOTO = "/img/home-photo.jpg"
 
 
 def cards(c):
     rows = []
     for year, where, imgs in CARD_YEARS:
         if imgs:
-            figs = "".join(c.slot("card", WIX + n, f"{where} holiday card, {year}", f"{where}, {year}", w, h) for n, w, h in imgs)
+            figs = "".join(c.slot("card", CARDS + n, f"{where} holiday card, {year}", f"{where}, {year}", w, h) for n, w, h in imgs)
             body = f'<div class="pair{" wide" if len(imgs) == 1 and imgs[0][1] > imgs[0][2] else ""}">{figs}</div>'
         else:
             body = "<p>This year's card goes out before the year ends. It shows up here once it has landed in mailboxes.</p>"
