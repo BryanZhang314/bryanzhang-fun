@@ -95,6 +95,7 @@ main{padding:44px 0 64px}
 .lately{margin-top:44px}
 .lately ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .lately li{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0 8px}
+.lately li.plain{display:block}
 .lately time{font-weight:600;color:var(--olive);font-variant-numeric:tabular-nums}
 
 /* photo and card slots */
@@ -240,6 +241,14 @@ def home(c):
   <ul>
     <li><time datetime="2026-11-15">15 Nov</time><span>The Drink Diary opened.</span></li>
     <li><time datetime="2026-11">Nov</time><span>The 2026 card list is open. Cards go out before the year ends.</span></li>
+  </ul>
+</div>
+
+<div class="lately">
+  <h2>Thanks</h2>
+  <ul>
+    <li class="plain">Thank you <span lang="zh">小冰块</span> for teaching us how to play 14 Points.</li>
+    <li class="plain">Thank you <span lang="zh">亚琦</span> for the inspiration behind the Drink Diary.</li>
   </ul>
 </div>
 """
