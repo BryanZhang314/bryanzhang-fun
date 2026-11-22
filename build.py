@@ -223,15 +223,24 @@ class Ctx:
         dims = f' width="{w}" height="{h}"' if w and h else ""
         return f'<figure class="slot {kind}"><img src="{e(src)}" alt="{e(alt)}"{dims} loading="lazy">{cap}</figure>'
 
-# The welcome clip from the old site's header, now a labelled button on the home page.
+# The welcome clip from the old site's header. It starts on its own once per browser
+# session. Browsers block sound until the visitor has touched the page, so when the
+# first try is refused it starts on their first tap, click or key press instead.
 WELCOME = """<div class="row"><button class="btn ghost" type="button" id="welcomeBtn" aria-pressed="false">&#9654; Play welcome</button>
-    <audio id="welcomeAudio" src="/audio/welcome.m4a" preload="none"></audio></div>
+    <audio id="welcomeAudio" src="/audio/welcome.m4a" preload="auto"></audio></div>
     <script>
-    (function(){var b=document.getElementById("welcomeBtn"),a=document.getElementById("welcomeAudio");
-    function show(on){b.textContent=on?"\u275A\u275A Pause welcome":"\u25B6 Play welcome";b.setAttribute("aria-pressed",on?"true":"false");}
-    b.addEventListener("click",function(){if(a.paused){a.play().catch(function(){show(false);});}else{a.pause();}});
-    a.addEventListener("play",function(){show(true);});a.addEventListener("pause",function(){show(false);});
-    a.addEventListener("ended",function(){a.currentTime=0;show(false);});})();
+    (function(){var b=document.getElementById("welcomeBtn"),a=document.getElementById("welcomeAudio"),KEY="welcome-played";
+    function show(on){b.textContent=on?"\\u275A\\u275A Pause welcome":"\\u25B6 Play welcome";b.setAttribute("aria-pressed",on?"true":"false");}
+    function seen(){try{return sessionStorage.getItem(KEY)==="1";}catch(e){return false;}}
+    function mark(){try{sessionStorage.setItem(KEY,"1");}catch(e){}}
+    var EV=["pointerdown","keydown"];
+    function disarm(){EV.forEach(function(n){document.removeEventListener(n,first,true);});}
+    function first(ev){disarm();if(ev.target&&ev.target.closest&&ev.target.closest("#welcomeBtn"))return;a.play().catch(function(){});}
+    b.addEventListener("click",function(){disarm();if(a.paused){a.play().catch(function(){show(false);});}else{a.pause();}});
+    a.addEventListener("play",function(){mark();show(true);});a.addEventListener("pause",function(){show(false);});
+    a.addEventListener("ended",function(){a.currentTime=0;show(false);});
+    if(!seen()){a.play().catch(function(){EV.forEach(function(n){document.addEventListener(n,first,true);});});}
+    })();
     </script>"""
 
 
