@@ -152,10 +152,8 @@ main{padding:44px 0 64px}
 }
 """
 
-FAVICON = ("data:image/svg+xml," + "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E"
-           "%3Crect width='64' height='64' rx='12' fill='%23EBC3CA'/%3E"
-           "%3Crect x='14' y='10' width='36' height='44' rx='5' fill='%23FCF4F4' stroke='%232E3220' stroke-width='3'/%3E"
-           "%3Ctext x='32' y='41' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='20' fill='%234C5327'%3E14%3C/text%3E%3C/svg%3E")
+FAVICON = ("data:image/svg+xml," +
+           "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23EBC3CA'/%3E%3Cpath fill='%234C5327' d='M6 39.1H11.2Q11.4 40.3 12.4 41Q13.4 41.8 15 41.8Q16.4 41.8 17.3 41.2Q18.1 40.6 18.1 39.7Q18.1 38.7 17.1 38.2Q16.1 37.7 13.8 37.1Q11.5 36.5 10.1 36Q8.6 35.4 7.5 34.1Q6.5 32.9 6.5 30.8Q6.5 29.1 7.5 27.7Q8.5 26.3 10.3 25.5Q12.1 24.7 14.6 24.7Q18.3 24.7 20.5 26.5Q22.7 28.3 22.9 31.5H17.9Q17.8 30.2 16.9 29.5Q16 28.8 14.5 28.8Q13.1 28.8 12.3 29.3Q11.5 29.8 11.5 30.8Q11.5 31.8 12.6 32.3Q13.6 32.9 15.8 33.4Q18 34 19.5 34.6Q20.9 35.2 22 36.4Q23 37.7 23.1 39.7Q23.1 41.5 22.1 42.9Q21.1 44.3 19.3 45.1Q17.4 45.9 15 45.9Q12.5 45.9 10.5 45Q8.5 44.1 7.3 42.5Q6.1 41 6 39.1ZM39.4 24.7Q42 24.7 44.1 26Q46.3 27.3 47.5 29.7Q48.8 32.1 48.8 35.2Q48.8 38.4 47.5 40.8Q46.3 43.2 44.1 44.6Q42 45.9 39.4 45.9Q37.1 45.9 35.3 45Q33.6 44.1 32.6 42.6V45.6H27.4V18.1H32.6V28Q33.6 26.5 35.3 25.6Q37.1 24.7 39.4 24.7ZM38 29.2Q36.6 29.2 35.3 30Q34.1 30.7 33.3 32.1Q32.6 33.4 32.6 35.3Q32.6 37.1 33.3 38.5Q34.1 39.9 35.3 40.6Q36.6 41.3 38 41.3Q39.4 41.3 40.7 40.6Q41.9 39.9 42.7 38.5Q43.4 37.1 43.4 35.2Q43.4 33.4 42.7 32Q41.9 30.6 40.7 29.9Q39.4 29.2 38 29.2ZM51.6 42.8Q51.6 41.5 52.5 40.6Q53.4 39.7 54.8 39.7Q56.2 39.7 57.1 40.6Q58 41.5 58 42.8Q58 44.1 57.1 45Q56.2 45.8 54.8 45.8Q53.4 45.8 52.5 45Q51.6 44.1 51.6 42.8Z'/%3E%3C/svg%3E")
 
 NAV = [("cards", "Holiday Card"), ("games", "Games"), ("drink-diary", "Drink Diary"), ("about", "About")]
 
@@ -415,6 +413,7 @@ def real_page(key):
 <meta property="og:image" content="{og_img}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{FAVICON}">
+<link rel="apple-touch-icon" href="/img/icon-180.png">
 {FONTS}
 <link rel="stylesheet" href="/site.css">
 </head>
