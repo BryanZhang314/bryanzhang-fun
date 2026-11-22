@@ -20,7 +20,6 @@ ROUTES = {
     "games": ("/games/", "games"),
     "14-points": ("/14-points/", "fourteen-points"),
     "sheng-ji": ("/sheng-ji/", "sheng-ji"),
-    "snake": ("/snake/", "snake"),
     "drink-diary": ("/drink-diary/", "drink-diary"),
     "cards": ("/bryan-xingjia-holiday-card/", "cards"),
     "about": ("/about/", "about"),
@@ -30,7 +29,6 @@ ROUTES = {
 EMBEDS = {
     "14-points": "https://bryanzhang.pythonanywhere.com/14-points/14-points.html",
     "sheng-ji": "https://bryanzhang.pythonanywhere.com/sheng-ji/Sheng-Ji-80-points.html",
-    "snake": "https://www-bryanzhang-fun.filesusr.com/html/3409c0_f1187e080692d4a41368b0022d108b1d.html",
     "drink-diary": "https://beverage-journal.onrender.com/public/",
     "cards": "https://bryanzhang.pythonanywhere.com/",
 }
@@ -263,7 +261,6 @@ def games(c):
     <a class="btn" href="{c.link('sheng-ji')}">Play Sheng Ji</a>
   </div>
 </div>
-<p class="aside">Snake is <a href="{c.link('snake')}">still here</a>, if you insist.</p>
 """
 
 
@@ -346,7 +343,7 @@ def privacy(c):
   <h1>Privacy policy</h1>
   <p class="lede">The short version.</p>
   <p>This site exists so Xingjia and I can mail you a holiday card, and so you can play cards.</p>
-  <p><strong>What we collect:</strong> the name, mailing address, and optional email, phone and notes you enter on the card sign-up form. If you save a snake score, we keep the name you type and your score.</p>
+  <p><strong>What we collect:</strong> the name, mailing address, and optional email, phone and notes you enter on the card sign-up form.</p>
   <p><strong>What we use it for:</strong> mailing you a card, and checking once a year that your address is still right.</p>
   <p><strong>What stays on your device:</strong> the games remember your player names, card back and settings in your own browser. That never reaches us.</p>
   <p><strong>Want off the list, or want your info deleted?</strong> Use the personal link we sent you, or email <a href="mailto:BryanZhang314@Gmail.com">BryanZhang314@Gmail.com</a> and we'll take care of it.</p>
@@ -359,7 +356,6 @@ PAGES = {
     "games": dict(title="Games", desc="14 Points and Sheng Ji, two card games you can play in the browser.", body=games),
     "14-points": dict(title="14 Points", desc="A card game by Bryan. Make sets that add up to 14. Play today's deal, the same shuffle for everyone.", embed_title="14 Points"),
     "sheng-ji": dict(title="Sheng Ji 升级 · 80 points", desc="Sheng Ji (80 points) in the browser, in English or Chinese. Play solo or send a friend the link.", embed_title="Sheng Ji"),
-    "snake": dict(title="Snake", desc="Snake. It's snake.", embed_title="Snake"),
     "drink-diary": dict(title="Drink Diary", desc="What Bryan and Xingjia have been drinking, with notes and ratings.", body=drink),
     "cards": dict(title="Holiday Card", desc="Get on Bryan and Xingjia's holiday card list, and see every card since 2021.", body=cards),
     "about": dict(title="About", desc="About Bryan and this site.", body=about),
@@ -367,7 +363,6 @@ PAGES = {
 }
 PAGES["14-points"]["body"] = game_page("14-points", "14 Points", "Make sets that add up to 14. Today's deal is the same shuffle for everyone.")
 PAGES["sheng-ji"]["body"] = game_page("sheng-ji", 'Sheng Ji <span lang="zh">升级</span>', "80 points. Two to four players, or solo against the computers.")
-PAGES["snake"]["body"] = game_page("snake", "Snake", "Arrow keys or WASD. Swipe on a phone.")
 
 
 def header(c, current):

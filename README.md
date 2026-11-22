@@ -21,4 +21,3 @@ independent, save them into `static/img/` and point `CARD_YEARS` and
 ## What still lives elsewhere
 - 14 Points, Sheng Ji, card sign-up form: bryanzhang.pythonanywhere.com
 - Drink Diary: beverage-journal.onrender.com
-- Snake: a Wix-hosted embed. Copy it out before the Wix plan ends.
