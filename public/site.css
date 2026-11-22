@@ -31,6 +31,7 @@ main{padding:44px 0 64px}
 .lede{font-size:1.15rem}
 .btn{display:inline-block;font-weight:600;text-decoration:none;padding:11px 20px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:var(--paper)}
 .btn.ghost{background:transparent;color:var(--ink)}
+button.btn{font:inherit;font-weight:600;cursor:pointer}
 .btn:hover{transform:translateY(-1px)}
 @media (prefers-reduced-motion:reduce){.btn:hover{transform:none}}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
