@@ -64,12 +64,34 @@
 </div>
 
 <div class="lately">
-  <h2>Lately</h2>
+  <h2>Today</h2>
   <ul>
-    <li><time datetime="2026-11-15">15 Nov</time><span>The Drink Diary opened.</span></li>
-    <li><time datetime="2026-11">Nov</time><span>The 2026 card list is open. Cards go out before the year ends.</span></li>
+    <li><span class="k">Daily deal</span><span><a href="/14-points/">14 Points<span id="liveDeal"></span></a>. The same shuffle for everyone, with a board for the day.</span></li>
+    <li id="liveWinRow" hidden><span class="k">Yesterday</span><span id="liveWin"></span></li>
+    <li id="liveDrinkRow" hidden><span class="k">Latest drink</span><span><a href="/drink-diary/" id="liveDrink"></a><span id="liveDrinkMeta"></span></span></li>
   </ul>
 </div>
+<script>
+(function(){
+  var d=new Date(), num=Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2025,0,1))/86400000);
+  document.getElementById("liveDeal").textContent=" #"+num;
+  function get(url){return fetch(url).then(function(r){if(!r.ok)throw 0;return r.json();});}
+  get("https://bryanzhang.pythonanywhere.com/sj/board/top?g=14p&day="+(num-1)).then(function(j){
+    var top=j.rows&&j.rows[0]; if(!top)return;
+    document.getElementById("liveWin").textContent=top.name+" topped the 14 Points board with "+top.score+" pts.";
+    document.getElementById("liveWinRow").hidden=false;
+  }).catch(function(){});
+  get("https://beverage-journal.onrender.com/public/latest.json").then(function(j){
+    var e=j.latest; if(!e||!e.name)return;
+    var meta=[]; if(e.category)meta.push(e.category);
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(e.date_tried||"");
+    if(m)meta.push(new Date(+m[1],m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"short"}));
+    document.getElementById("liveDrink").textContent=e.name;
+    document.getElementById("liveDrinkMeta").textContent=meta.length?" · "+meta.join(" · "):"";
+    document.getElementById("liveDrinkRow").hidden=false;
+  }).catch(function(){});
+})();
+</script>
 </div></main>
 <footer class="foot"><div class="wrap"><div class="links"><span>Say hello: <a href="mailto:BryanZhang314@Gmail.com">BryanZhang314@Gmail.com</a></span><a href="/privacy/">Privacy policy (it's short)</a></div><span>&copy; 2666 by Bryan&#x27;s Cyber-Physiognomy</span></div></footer>
 </body>

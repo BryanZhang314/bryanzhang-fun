@@ -94,7 +94,9 @@ main{padding:44px 0 64px}
 .door:hover h3{text-decoration:underline;text-underline-offset:.15em}
 .lately{margin-top:44px}
 .lately ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
-.lately li{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0 8px}
+.lately li{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:0 8px}
+.lately li[hidden]{display:none}
+.lately .k{font-weight:600;color:var(--olive)}
 .thanks{display:flex;flex-direction:column;gap:4px;font-size:.95rem;border-left:3px solid var(--olive);padding-left:14px}
 .lately time{font-weight:600;color:var(--olive);font-variant-numeric:tabular-nums}
 
@@ -158,6 +160,35 @@ FAVICON = ("data:image/svg+xml," + "%3Csvg xmlns='http://www.w3.org/2000/svg' vi
            "%3Ctext x='32' y='41' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='20' fill='%234C5327'%3E14%3C/text%3E%3C/svg%3E")
 
 NAV = [("cards", "Holiday Card"), ("games", "Games"), ("drink-diary", "Drink Diary"), ("about", "About")]
+
+
+# The home page's "Today" rows fill themselves in: the deal number from the date,
+# yesterday's top score from the daily board, the newest entry from the Drink Diary.
+# A row that can't be fetched stays hidden.
+BOARD = "https://bryanzhang.pythonanywhere.com/sj/board"
+JOURNAL = "https://beverage-journal.onrender.com"
+LIVE = """<script>
+(function(){
+  var d=new Date(), num=Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2025,0,1))/86400000);
+  document.getElementById("liveDeal").textContent=" #"+num;
+  function get(url){return fetch(url).then(function(r){if(!r.ok)throw 0;return r.json();});}
+  get("%s/top?g=14p&day="+(num-1)).then(function(j){
+    var top=j.rows&&j.rows[0]; if(!top)return;
+    document.getElementById("liveWin").textContent=top.name+" topped the 14 Points board with "+top.score+" pts.";
+    document.getElementById("liveWinRow").hidden=false;
+  }).catch(function(){});
+  get("%s/public/latest.json").then(function(j){
+    var e=j.latest; if(!e||!e.name)return;
+    var meta=[]; if(e.category)meta.push(e.category);
+    var m=/^(\\d{4})-(\\d{2})-(\\d{2})/.exec(e.date_tried||"");
+    if(m)meta.push(new Date(+m[1],m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"short"}));
+    document.getElementById("liveDrink").textContent=e.name;
+    document.getElementById("liveDrinkMeta").textContent=meta.length?" · "+meta.join(" · "):"";
+    document.getElementById("liveDrinkRow").hidden=false;
+  }).catch(function(){});
+})();
+</script>""" % (BOARD, JOURNAL)
+
 
 
 def e(s):
@@ -241,12 +272,14 @@ def home(c):
 </div>
 
 <div class="lately">
-  <h2>Lately</h2>
+  <h2>Today</h2>
   <ul>
-    <li><time datetime="2026-11-15">15 Nov</time><span>The Drink Diary opened.</span></li>
-    <li><time datetime="2026-11">Nov</time><span>The 2026 card list is open. Cards go out before the year ends.</span></li>
+    <li><span class="k">Daily deal</span><span><a href="{c.link('14-points')}">14 Points<span id="liveDeal"></span></a>. The same shuffle for everyone, with a board for the day.</span></li>
+    <li id="liveWinRow" hidden><span class="k">Yesterday</span><span id="liveWin"></span></li>
+    <li id="liveDrinkRow" hidden><span class="k">Latest drink</span><span><a href="{c.link('drink-diary')}" id="liveDrink"></a><span id="liveDrinkMeta"></span></span></li>
   </ul>
 </div>
+{"" if c.preview else LIVE}
 """
 
 
