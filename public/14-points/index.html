@@ -785,6 +785,18 @@
       @media (max-width:560px){
         body.fit #gameScreen .deckpile{display:flex;align-items:center;gap:.35rem;width:auto;flex:none;}
       }
+    
+      /* ===== crowded table on a laptop: piles sit beside the field, one tools row, and the felt scrolls before anything is cut off ===== */
+      @media (min-width:900px){
+        #gameScreen .topbar .logo{flex:0 0 auto;}
+        #gameScreen .topbar .tiny{flex:1 1 auto;margin-top:0;}
+        .table-grid .felt .inplay{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:1.4rem;align-items:start;}
+        .table-grid .felt .inplay > .inplay-head,.table-grid .felt .inplay > .inplay-sub{grid-column:1 / -1;}
+        .table-grid .felt .inplay > .zone-label,.table-grid .felt .inplay > #field{grid-column:1;}
+        .table-grid .felt .inplay > #pilesSec{grid-column:2;grid-row:3 / span 2;}
+        .table-grid .felt .inplay > #pilesSec .zone-label{margin-top:0 !important;}
+        body.fit #gameScreen .table-grid .felt{overflow-y:auto;}
+      }
     </style>
   </head>
   <body>
