@@ -26,6 +26,10 @@ ROUTES = {
     "privacy": ("/privacy/", "privacy"),
 }
 
+# These two pages are the game files themselves (static/<name>/index.html), not a
+# shell around a frame, so they load fast and their invite links stay short.
+GAME_FILES = {"14-points", "sheng-ji"}
+
 EMBEDS = {
     "14-points": "https://bryanzhang.pythonanywhere.com/14-points/14-points.html",
     "sheng-ji": "https://bryanzhang.pythonanywhere.com/sheng-ji/Sheng-Ji-80-points.html",
@@ -431,6 +435,8 @@ def build_site():
     with open(os.path.join(OUT, "site.css"), "w") as f:
         f.write(CSS.strip() + "\n")
     for key in PAGES:
+        if key in GAME_FILES:
+            continue  # the game's own file in static/ is the page
         d = os.path.join(OUT, ROUTES[key][0].strip("/"))
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w") as f:

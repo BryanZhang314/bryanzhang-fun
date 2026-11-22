@@ -18,6 +18,11 @@ working only while those files stay in the Wix account. To make the site
 independent, save them into `static/img/` and point `CARD_YEARS` and
 `HOME_PHOTO` in `build.py` at the local paths.
 
+## Games
+14 Points and Sheng Ji are single files: `static/14-points/index.html` and
+`static/sheng-ji/index.html`. These are now the copies to edit. The older
+copies on PythonAnywhere are no longer what the site serves.
+
 ## What still lives elsewhere
-- 14 Points, Sheng Ji, card sign-up form: bryanzhang.pythonanywhere.com
+- Card sign-up form and the Sheng Ji online-room relay: bryanzhang.pythonanywhere.com
 - Drink Diary: beverage-journal.onrender.com
