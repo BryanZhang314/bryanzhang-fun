@@ -95,7 +95,7 @@ main{padding:44px 0 64px}
 .lately{margin-top:44px}
 .lately ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .lately li{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0 8px}
-.lately li.plain{display:block}
+.thanks{display:flex;flex-direction:column;gap:4px;font-size:.95rem;border-left:3px solid var(--olive);padding-left:14px}
 .lately time{font-weight:600;color:var(--olive);font-variant-numeric:tabular-nums}
 
 /* photo and card slots */
@@ -201,6 +201,10 @@ def home(c):
   <div class="stack">
     <h1>This was supposed to be a holiday card sign-up page.</h1>
     <p class="lede">It got out of hand. Now it has two card games and a drink diary.</p>
+    <div class="thanks">
+      <p>Thank you <span lang="zh">小冰块</span> for teaching us how to play 14 Points.</p>
+      <p>Thank you <span lang="zh">亚琦</span> for the inspiration behind the Drink Diary.</p>
+    </div>
   </div>
   <div class="today">
     <span class="eyebrow">2026 card list is open</span>
@@ -224,7 +228,7 @@ def home(c):
   <section class="cat">
     <h2>Games</h2>
     <div class="doors">
-      <a class="door" href="{c.link('14-points')}"><h3>14 Points</h3><p>My own card game. Make sets that add up to 14. Today's deal is the same shuffle for everyone, so play it and send someone your result.</p><span class="go">Play &rarr;</span></a>
+      <a class="door" href="{c.link('14-points')}"><h3>14 Points</h3><p>Make sets that add up to 14. Today's deal is the same shuffle for everyone, so play it and send someone your result.</p><span class="go">Play &rarr;</span></a>
       <a class="door" href="{c.link('sheng-ji')}"><h3>Sheng Ji <span lang="zh">升级</span></h3><p>80 points, in English or 中文. Play solo, or send one friend a link and play from two phones.</p><span class="go">Play &rarr;</span></a>
     </div>
   </section>
@@ -241,14 +245,6 @@ def home(c):
   <ul>
     <li><time datetime="2026-11-15">15 Nov</time><span>The Drink Diary opened.</span></li>
     <li><time datetime="2026-11">Nov</time><span>The 2026 card list is open. Cards go out before the year ends.</span></li>
-  </ul>
-</div>
-
-<div class="lately">
-  <h2>Thanks</h2>
-  <ul>
-    <li class="plain">Thank you <span lang="zh">小冰块</span> for teaching us how to play 14 Points.</li>
-    <li class="plain">Thank you <span lang="zh">亚琦</span> for the inspiration behind the Drink Diary.</li>
   </ul>
 </div>
 """
@@ -367,7 +363,7 @@ def privacy(c):
 PAGES = {
     "home": dict(title=SITE, desc="Bryan Zhang's site: a yearly holiday card, two card games and a drink diary.", body=home),
     "games": dict(title="Games", desc="14 Points and Sheng Ji, two card games you can play in the browser.", body=games),
-    "14-points": dict(title="14 Points", desc="A card game by Bryan. Make sets that add up to 14. Play today's deal, the same shuffle for everyone.", embed_title="14 Points"),
+    "14-points": dict(title="14 Points", desc="Make sets that add up to 14. Play today's deal, the same shuffle for everyone.", embed_title="14 Points"),
     "sheng-ji": dict(title="Sheng Ji 升级 · 80 points", desc="Sheng Ji (80 points) in the browser, in English or Chinese. Play solo or send a friend the link.", embed_title="Sheng Ji"),
     "drink-diary": dict(title="Drink Diary", desc="What Bryan and Xingjia have been drinking, with notes and ratings.", body=drink),
     "cards": dict(title="Holiday Card", desc="Get on Bryan and Xingjia's holiday card list, and see every card since 2021.", body=cards),
