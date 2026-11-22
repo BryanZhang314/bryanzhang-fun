@@ -742,6 +742,28 @@
       @media (max-width:560px){
         .settings{position:fixed;left:8px;right:8px;top:54px;width:auto;max-height:calc(100dvh - 68px);overflow:auto;}
       }
+    
+      /* ===== the table in Sheng Ji's shape: title, a row of tools, score panels, green felt ===== */
+      :root{--felt:#4b5a3c;--felt-deep:#3a4730;--felt-line:#6b7a57;--felt-ink:#f4f1e4;--felt-soft:#cfd6bd;}
+      #gameScreen .topbar{gap:.4rem;}
+      #gameScreen .topbar .logo{flex:1 0 100%;font-size:1.15rem;}
+      #gameScreen .topbar .spacer{display:none;}
+      #gameScreen .topbar .tiny{flex:1 0 100%;margin-top:-.3rem;}
+      #gameScreen .topbar .tiny:empty{display:none;}
+      #gameScreen .chip{border-width:2px;border-radius:12px;padding:.45rem .7rem;}
+      #gameScreen .chip.turn{border-color:var(--ink);background:#fff;box-shadow:var(--shadow);}
+      .table-grid .felt{background:radial-gradient(ellipse at 50% 35%,var(--felt) 0%,var(--felt-deep) 100%);border:3px solid var(--felt-line);border-radius:16px;box-shadow:inset 0 0 28px rgba(0,0,0,.28);color:var(--felt-ink);}
+      .table-grid .felt .inplay{background:transparent;border:0;padding:.2rem .1rem .3rem;}
+      .table-grid .felt .inplay-head,.table-grid .felt .inplay-sub b{color:var(--felt-ink);}
+      .table-grid .felt .inplay-head .pick,.table-grid .felt .inplay-sub,.table-grid .felt .zone-label,.table-grid .felt .zone-label .count{color:var(--felt-soft);}
+      .table-grid .felt .deckpile .n{color:var(--felt-ink);}
+      .table-grid .felt .deckpile div.ph,.table-grid .felt .pileempty{border-color:var(--felt-line);color:var(--felt-soft);}
+      .table-grid .felt .pilewrap .who{color:var(--felt-soft);}
+      .table-grid .felt .pilewrap .who .stealverb{color:#f0cf7a;}
+      .table-grid .felt .pilewrap.own{background:rgba(0,0,0,.14);border-color:var(--felt-line);}
+      .table-grid .felt .pilewrap.own .who,.table-grid .felt .piletag.owntag{color:var(--felt-soft);border-color:var(--felt-line);}
+      .table-grid .felt .pilewrap.armed{background:rgba(240,207,122,.16);border-color:#f0cf7a;}
+      .table-grid .felt .lastset{color:var(--ink);}
     </style>
   </head>
   <body>
@@ -950,7 +972,7 @@
 
           <div class="log" id="logPanel">
             <div class="log-head">
-              <h3>what's happened</h3>
+              <h3>what happened</h3>
               <button class="logtoggle" id="logToggle" type="button" aria-expanded="true" aria-controls="log">hide ▴</button>
             </div>
             <ul id="log"></ul>
