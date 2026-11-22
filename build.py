@@ -100,7 +100,9 @@ main{padding:44px 0 64px}
 .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .slot figcaption{position:relative;z-index:1;width:100%;padding:8px 12px;font-size:.85rem;font-weight:500;background:rgba(252,244,244,.92);border-top:1.5px solid var(--rule)}
 .slot.photo{aspect-ratio:4/5}
-.slot.card{aspect-ratio:7/5}
+.slot.card{display:block}
+.slot.card img{position:static;width:100%;height:auto}
+.slot.card.empty{aspect-ratio:3/4;display:flex}
 .slot .missing{position:absolute;inset:0 0 40px 0;display:grid;place-items:center;text-align:center;padding:12px;font-size:.85rem;color:var(--olive);font-weight:500}
 
 /* embeds */
@@ -124,7 +126,8 @@ main{padding:44px 0 64px}
 .year{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:8px 24px;align-items:start;border-top:1.5px solid var(--rule);padding-top:18px}
 .year .when{font-family:var(--display);font-weight:500;font-size:1.6rem;color:var(--olive);font-variant-numeric:tabular-nums;line-height:1}
 .year .where{font-weight:500;font-size:.92rem}
-.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:640px;align-items:start}
+.pair.wide{grid-template-columns:minmax(0,1fr)}
 .prose{display:flex;flex-direction:column;gap:16px}
 .prose h2{margin-top:14px}
 .split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:36px;align-items:start}
@@ -180,12 +183,12 @@ class Ctx:
                 f'allow="clipboard-write; fullscreen; web-share"></iframe></div>'
                 f'<p class="aside"><a href="{e(url)}">Open it on its own page</a> if the frame misbehaves.</p>')
 
-    def slot(self, kind, src, alt, caption):
+    def slot(self, kind, src, alt, caption="", w=None, h=None):
+        cap = f'<figcaption>{e(caption)}</figcaption>' if caption else ""
         if self.preview:
-            inner = '<div class="missing">Image goes here</div>'
-        else:
-            inner = f'<img src="{e(src)}" alt="{e(alt)}" loading="lazy">'
-        return f'<figure class="slot {kind}">{inner}<figcaption>{e(caption)}</figcaption></figure>'
+            return f'<figure class="slot {kind} empty"><div class="missing">Image goes here</div>{cap}</figure>'
+        dims = f' width="{w}" height="{h}"' if w and h else ""
+        return f'<figure class="slot {kind}"><img src="{e(src)}" alt="{e(alt)}"{dims} loading="lazy">{cap}</figure>'
 
 
 def home(c):
@@ -286,22 +289,25 @@ def drink(c):
 """
 
 
+# Card scans are still served from Wix's image host (the files uploaded there in July 2026).
+WIX = "https://static.wixstatic.com/media/"
 CARD_YEARS = [
     ("2026", "On its way", []),
-    ("2025", "Alhambra", ["2025-alhambra-1", "2025-alhambra-2"]),
-    ("2024", "HD Museum", ["2024-hd-museum-1", "2024-hd-museum-2"]),
-    ("2023", "Tokyo", ["2023-tokyo-1", "2023-tokyo-2"]),
-    ("2022", "New Jersey", ["2022-new-jersey-1"]),
-    ("2021", "Harlem", ["2021-harlem-1"]),
+    ("2025", "Alhambra", [("3409c0_127c7685e49445ca80f4ea74d4b44e38~mv2.png", 620, 838), ("3409c0_c3af685ff9bf4949ba208cfc751caf84~mv2.png", 624, 855)]),
+    ("2024", "HD Museum", [("3409c0_844e7e2efb4147f299016c2ef83fea5c~mv2.png", 593, 804), ("3409c0_65416871495f4ff6b0288069d6371cd2~mv2.png", 614, 806)]),
+    ("2023", "Tokyo", [("3409c0_1ea9292511674fafa770594bafef4791~mv2.png", 606, 798), ("3409c0_3024c3234fbd4633b97397cb825af68b~mv2.png", 594, 791)]),
+    ("2022", "New Jersey", [("3409c0_c66085823e824023b05a67cd5996f97a~mv2.png", 1309, 837)]),
+    ("2021", "Harlem", [("3409c0_2a74c66615b347ae987364a93466ce77~mv2.png", 695, 884)]),
 ]
+HOME_PHOTO = WIX + "3409c0_2f1e84c2a5b84c1fad418d7263765fdf~mv2.jpg/v1/fill/w_800,h_1000,al_c,q_85/photo.jpg"
 
 
 def cards(c):
     rows = []
     for year, where, imgs in CARD_YEARS:
         if imgs:
-            figs = "".join(c.slot("card", f"/img/cards/{n}.png", f"{where} holiday card, {year}", f"{where}, {year}") for n in imgs)
-            body = f'<div class="pair">{figs}</div>'
+            figs = "".join(c.slot("card", WIX + n, f"{where} holiday card, {year}", f"{where}, {year}", w, h) for n, w, h in imgs)
+            body = f'<div class="pair{" wide" if len(imgs) == 1 and imgs[0][1] > imgs[0][2] else ""}">{figs}</div>'
         else:
             body = "<p>This year's card goes out before the year ends. It shows up here once it has landed in mailboxes.</p>"
         rows.append(f'<div class="year"><div><div class="when">{year}</div><div class="where">{e(where)}</div></div>{body}</div>')
@@ -329,7 +335,7 @@ def about(c):
     <p>Every year I send holiday cards to friends and family, and Xingjia has since joined in. This site started as the card sign-up. Then I kept adding games. Nothing here is for sale.</p>
     <div class="row"><a class="btn" href="{c.link('cards')}">Get on the card list</a></div>
   </div>
-  {c.slot('photo', '/img/about.jpg', 'Bryan', 'Bryan')}
+  {c.slot('photo', HOME_PHOTO, 'A person in a pink hat and sunglasses standing in a field of pink flowers', '', 800, 1000)}
 </div>
 """
 

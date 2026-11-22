@@ -11,13 +11,12 @@ Edit copy and pages in `build.py`; never edit `public/` by hand.
 `public/` is committed, so the host serves it as-is. Run `python3 build.py` before
 committing any change to `build.py` or `static/`.
 
-## Images still needed (put them here, then rebuild)
-- `static/img/about.jpg`            Bryan
-- `static/img/cards/2025-alhambra-1.png`, `2025-alhambra-2.png`
-- `static/img/cards/2024-hd-museum-1.png`, `2024-hd-museum-2.png`
-- `static/img/cards/2023-tokyo-1.png`, `2023-tokyo-2.png`
-- `static/img/cards/2022-new-jersey-1.png`
-- `static/img/cards/2021-harlem-1.png`
+## Images
+Card scans and the About photo are loaded straight from Wix's image host
+(static.wixstatic.com), using the files uploaded there in July 2026. They keep
+working only while those files stay in the Wix account. To make the site
+independent, save them into `static/img/` and point `CARD_YEARS` and
+`HOME_PHOTO` in `build.py` at the local paths.
 
 ## What still lives elsewhere
 - 14 Points, Sheng Ji, card sign-up form: bryanzhang.pythonanywhere.com
