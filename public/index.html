@@ -26,13 +26,20 @@
     <h1>This was supposed to be a holiday card sign-up page.</h1>
     <p class="lede">It got out of hand. Now it has two card games and a drink diary.</p>
     <div class="row"><button class="btn ghost" type="button" id="welcomeBtn" aria-pressed="false">&#9654; Play welcome</button>
-    <audio id="welcomeAudio" src="/audio/welcome.m4a" preload="none"></audio></div>
+    <audio id="welcomeAudio" src="/audio/welcome.m4a" preload="auto"></audio></div>
     <script>
-    (function(){var b=document.getElementById("welcomeBtn"),a=document.getElementById("welcomeAudio");
-    function show(on){b.textContent=on?"❚❚ Pause welcome":"▶ Play welcome";b.setAttribute("aria-pressed",on?"true":"false");}
-    b.addEventListener("click",function(){if(a.paused){a.play().catch(function(){show(false);});}else{a.pause();}});
-    a.addEventListener("play",function(){show(true);});a.addEventListener("pause",function(){show(false);});
-    a.addEventListener("ended",function(){a.currentTime=0;show(false);});})();
+    (function(){var b=document.getElementById("welcomeBtn"),a=document.getElementById("welcomeAudio"),KEY="welcome-played";
+    function show(on){b.textContent=on?"\u275A\u275A Pause welcome":"\u25B6 Play welcome";b.setAttribute("aria-pressed",on?"true":"false");}
+    function seen(){try{return sessionStorage.getItem(KEY)==="1";}catch(e){return false;}}
+    function mark(){try{sessionStorage.setItem(KEY,"1");}catch(e){}}
+    var EV=["pointerdown","keydown"];
+    function disarm(){EV.forEach(function(n){document.removeEventListener(n,first,true);});}
+    function first(ev){disarm();if(ev.target&&ev.target.closest&&ev.target.closest("#welcomeBtn"))return;a.play().catch(function(){});}
+    b.addEventListener("click",function(){disarm();if(a.paused){a.play().catch(function(){show(false);});}else{a.pause();}});
+    a.addEventListener("play",function(){mark();show(true);});a.addEventListener("pause",function(){show(false);});
+    a.addEventListener("ended",function(){a.currentTime=0;show(false);});
+    if(!seen()){a.play().catch(function(){EV.forEach(function(n){document.addEventListener(n,first,true);});});}
+    })();
     </script>
     <div class="thanks">
       <p>Thank you <span lang="zh">小冰块</span> for teaching us how to play 14 Points.</p>
