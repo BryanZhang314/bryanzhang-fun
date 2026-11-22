@@ -24,3 +24,16 @@ copies on PythonAnywhere are no longer what the site serves.
 ## What still lives elsewhere
 - Card sign-up form, and the online-room relay both games share (`/sj`): bryanzhang.pythonanywhere.com
 - Drink Diary: beverage-journal.onrender.com
+
+## Daily board and the home page's "Today" rows
+- `server/shengji_relay.py` is the file that runs on PythonAnywhere at `/sj`. It
+  passes messages for online rooms and keeps the 14 Points daily board
+  (`/sj/board/post`, `/sj/board/top`). This repo holds the copy to edit; to
+  release a change, upload it over the one on PythonAnywhere and reload the
+  web app. Nothing deploys it automatically.
+- Only the standard daily deal (you against one medium computer) posts to the
+  board. A name is typed once and kept on that device. There are no accounts,
+  so anyone can post under any name.
+- The home page fills in the deal number, yesterday's top score (from the
+  board) and the newest drink (from the journal's `/public/latest.json`). A row
+  whose source can't be reached stays hidden.

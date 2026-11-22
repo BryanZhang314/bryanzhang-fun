@@ -55,7 +55,9 @@ button.btn{font:inherit;font-weight:600;cursor:pointer}
 .door:hover h3{text-decoration:underline;text-underline-offset:.15em}
 .lately{margin-top:44px}
 .lately ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
-.lately li{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0 8px}
+.lately li{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:0 8px}
+.lately li[hidden]{display:none}
+.lately .k{font-weight:600;color:var(--olive)}
 .thanks{display:flex;flex-direction:column;gap:4px;font-size:.95rem;border-left:3px solid var(--olive);padding-left:14px}
 .lately time{font-weight:600;color:var(--olive);font-variant-numeric:tabular-nums}
 
