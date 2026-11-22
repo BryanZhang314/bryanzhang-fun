@@ -104,8 +104,9 @@ main{padding:44px 0 64px}
 .slot .missing{position:absolute;inset:0 0 40px 0;display:grid;place-items:center;text-align:center;padding:12px;font-size:.85rem;color:var(--olive);font-weight:500}
 
 /* embeds */
-.stage{background:var(--petal);border:1.5px solid var(--rule);border-radius:12px;overflow:hidden}
-.stage iframe{display:block;width:100%;border:0;height:max(720px,calc(100dvh - 150px))}
+.stage{position:relative;background:var(--petal);border:1.5px solid var(--rule);border-radius:12px;overflow:hidden}
+.stage.live::before{content:"Loading\2026";position:absolute;inset:0 0 auto 0;padding:64px 24px;text-align:center;color:var(--olive);font-weight:500}
+.stage iframe{position:relative;display:block;width:100%;border:0;height:max(720px,calc(100dvh - 150px))}
 .stage.tall iframe{height:1650px}
 .stage .standin{padding:56px 24px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .gamehead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:16px}
@@ -175,7 +176,7 @@ class Ctx:
                     f'<h2>{e(title)} loads here on the live site</h2>'
                     f'<p>This preview can\'t show outside frames. On bryanzhang.fun this box is the real thing, full width.</p>'
                     f'<a class="btn ghost" href="{e(url)}">Open it in a new tab</a></div></div>')
-        return (f'<div class="{cls}"><iframe src="{e(url)}" title="{e(title)}" loading="lazy" '
+        return (f'<div class="{cls} live"><iframe src="{e(url)}" title="{e(title)}" '
                 f'allow="clipboard-write; fullscreen; web-share"></iframe></div>'
                 f'<p class="aside"><a href="{e(url)}">Open it on its own page</a> if the frame misbehaves.</p>')
 
